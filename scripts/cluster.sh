@@ -1,10 +1,10 @@
 #!/bin/sh
 #SBATCH -N 1      # nodes requested
 #SBATCH -n 1      # tasks requested
-#SBATCH --partition=Teach-Standard
+#SBATCH --partition=Teach-Standard*
 #SBATCH --gres=gpu:2
-#SBATCH --mem=12000  # memory in Mb
-#SBATCH --time=0-04:00:00
+#SBATCH --mem=7500  # memory in Mb
+#SBATCH --time=0-08:00:00
 
 
 export CUDA_HOME=/opt/cuda-9.0.176.1/
@@ -29,7 +29,7 @@ export TMPDIR=/disk/scratch/${STUDENT_ID}/
 export TMP=/disk/scratch/${STUDENT_ID}/
 
 mkdir -p ${TMP}/datasets/
-export DATASET_DIR=${TMP}/datasets/
+export DATASET_DIR=${TMP}/datasets/mnist_4channel/AB
 # Activate the relevant virtual environment:
 rsync -ua /home/${STUDENT_ID}/pytorch-CycleGAN-and-pix2pix/tars/AB.tar.gz "${DATASET_DIR}"
 tar -xzf "${DATASET_DIR}/AB.tar.gz" -C "${DATASET_DIR}"
