@@ -12,7 +12,7 @@ if sys.version_info[0] == 2:
 else:
     VisdomExceptionBase = ConnectionError
 
-
+print( 'visualizer called')
 def save_images(webpage, visuals, image_path, aspect_ratio=1.0, width=256):
     """Save images to the disk.
 
@@ -25,6 +25,7 @@ def save_images(webpage, visuals, image_path, aspect_ratio=1.0, width=256):
 
     This function will save images stored in 'visuals' to the HTML file specified by 'webpage'.
     """
+    print('save images called')
     image_dir = webpage.get_image_dir()
     short_path = ntpath.basename(image_path[0])
     name = os.path.splitext(short_path)[0]
@@ -36,6 +37,7 @@ def save_images(webpage, visuals, image_path, aspect_ratio=1.0, width=256):
         im = util.tensor2im(im_data)
         image_name = '%s_%s.png' % (name, label)
         save_path = os.path.join(image_dir, image_name)
+        print(save_path)
         util.save_image(im, save_path, aspect_ratio=aspect_ratio)
         ims.append(image_name)
         txts.append(label)
@@ -137,8 +139,6 @@ class Visualizer():
                 try:
                     rgb_images = []
                     for image in images:
-                        #print(self.get_image_paths)
-                        save_images(image, self.get_image_paths, aspect_ratio=opt.aspect_ratio, width=opt.display_winsize)
                         rgb_images.append(image[0:3,:,:])
                     self.vis.images(rgb_images, nrow=ncols, win=self.display_id + 1,
                                     padding=2, opts=dict(title=title + ' images'))
