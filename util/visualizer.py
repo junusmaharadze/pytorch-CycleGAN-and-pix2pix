@@ -103,6 +103,7 @@ class Visualizer():
             epoch (int) - - the current epoch
             save_result (bool) - - if save the current results to an HTML file
         """
+        print('using display current restuls')
         if self.display_id > 0:  # show images in the browser using visdom
             ncols = self.ncols
             if ncols > 0:        # show all the images in one visdom panel
@@ -136,6 +137,8 @@ class Visualizer():
                 try:
                     rgb_images = []
                     for image in images:
+                        #print(self.get_image_paths)
+                        save_images(image, self.get_image_paths, aspect_ratio=opt.aspect_ratio, width=opt.display_winsize)
                         rgb_images.append(image[0:3,:,:])
                     self.vis.images(rgb_images, nrow=ncols, win=self.display_id + 1,
                                     padding=2, opts=dict(title=title + ' images'))
