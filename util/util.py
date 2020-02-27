@@ -53,15 +53,19 @@ def save_image(image_numpy, image_path, aspect_ratio=1.0):
         image_numpy (numpy array) -- input numpy array
         image_path (str)          -- the path of the image
     """
+    img = Image.fromarray(image_numpy[:,:,0:3]).convert('RGB')
+    # Open alpha channel, ensuring single channel
+    alpha = Image.fromarray(image_numpy[:,:,3]).convert('L')
+    img.putalpha(alpha)
+    #print('shape numpy image in sae image:', image_numpy.shape)
+    #image_pil = Image.fromarray(image_numpy)
+    #h, w, _ = image_numpy.shape
 
-    image_pil = Image.fromarray(image_numpy)
-    h, w, _ = image_numpy.shape
-
-    if aspect_ratio > 1.0:
-        image_pil = image_pil.resize((h, int(w * aspect_ratio)), Image.BICUBIC)
-    if aspect_ratio < 1.0:
-        image_pil = image_pil.resize((int(h / aspect_ratio), w), Image.BICUBIC)
-    image_pil.save(image_path)
+    #if aspect_ratio > 1.0:
+    #    image_pil = image_pil.resize((h, int(w * aspect_ratio)), Image.BICUBIC)
+    #if aspect_ratio < 1.0:
+    #    image_pil = image_pil.resize((int(h / aspect_ratio), w), Image.BICUBIC)
+    img.save(image_path)
 
 
 def print_numpy(x, val=True, shp=False):

@@ -129,6 +129,7 @@ class BaseModel(ABC):
         visual_ret = OrderedDict()
         for name in self.visual_names:
             if isinstance(name, str):
+                print(self.fake_B.shape)
                 visual_ret[name] = getattr(self, name)
         return visual_ret
 
