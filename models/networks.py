@@ -462,6 +462,8 @@ class UnetGenerator(nn.Module):
 
     def forward(self, input):
         """Standard forward"""
+        #x = self.model(input)
+        #x[:,3,:,:] = self.real_A[:,3,:,:]
         return self.model(input)
 
 

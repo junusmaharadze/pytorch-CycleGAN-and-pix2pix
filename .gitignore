@@ -4,7 +4,7 @@ datasets/
 checkpoints/
 build/
 dist/
-#*.png
+*.png
 torch.egg-info/
 */**/__pycache__
 torch/version.py
@@ -40,7 +40,8 @@ test/.coverage
 test/data/legacy_serialized.pt
 *~
 .idea
-
+results/results/mnist_4_channel_bs64_200dec/*
+#results 2/
 
 .env
 sftp-config.json
