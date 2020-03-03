@@ -12,7 +12,6 @@ if sys.version_info[0] == 2:
 else:
     VisdomExceptionBase = ConnectionError
 
-print( 'visualizer called')
 def save_images(webpage, visuals, image_path, aspect_ratio=1.0, width=256):
     """Save images to the disk.
 
