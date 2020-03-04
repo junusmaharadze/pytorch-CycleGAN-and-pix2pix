@@ -5,12 +5,12 @@ from torch.nn import init
 import functools
 from torch.optim import lr_scheduler
 
-
 ###############################################################################
 # Helper Functions
 ###############################################################################
 
 dict_vals = None
+
 
 # Hooks are called before and after each forward method in each one of the layers in Sequential
 
@@ -27,28 +27,31 @@ def fwd_hook(m, inputs, outputs):
     outputs = dict(real_A=outputs, true_labels=dict_vals)
     return outputs
 
+
 def pre_fwd_hook_discr(m, inputs):
-    #print('pre fwd hook discr')
+    # print('pre fwd hook discr')
     global dict_vals_discr
     # print(m, 'prehook', inputs)
     dict_vals_discr = {}
     current_key = list(inputs[0].keys())[0]
     dict_vals_discr[current_key] = inputs[0]['true_labels']
-    #print(list(inputs[0].keys())[0])
+    # print(list(inputs[0].keys())[0])
     return inputs[0][current_key]
 
+
 def fwd_hook_discr(m, inputs, outputs):
-    #print('fwd hook discr')
+    # print('fwd hook discr')
 
     # outputs is output from forward
     key = list(dict_vals_discr.keys())[0]
-    #print(key)
+    # print(key)
     if key == 'fake_AB':
         outputs = dict(fake_AB=outputs, true_labels=list(dict_vals_discr.values()))
     if key == 'real_AB':
         outputs = dict(real_AB=outputs, true_labels=list(dict_vals_discr.values()))
-    #print('fwd_hook_discr', outputs.shape, dict_vals_discr)
+    # print('fwd_hook_discr', outputs.shape, dict_vals_discr)
     return outputs
+
 
 class Identity(nn.Module):
     def forward(self, x):
@@ -69,7 +72,8 @@ def get_norm_layer(norm_type='instance'):
     elif norm_type == 'instance':
         norm_layer = functools.partial(nn.InstanceNorm2d, affine=False, track_running_stats=False)
     elif norm_type == 'none':
-        def norm_layer(x): return Identity()
+        def norm_layer(x):
+            return Identity()
     else:
         raise NotImplementedError('normalization layer [%s] is not found' % norm_type)
     return norm_layer
@@ -92,6 +96,7 @@ def get_scheduler(optimizer, opt):
         def lambda_rule(epoch):
             lr_l = 1.0 - max(0, epoch + opt.epoch_count - opt.n_epochs) / float(opt.n_epochs_decay + 1)
             return lr_l
+
         scheduler = lr_scheduler.LambdaLR(optimizer, lr_lambda=lambda_rule)
     elif opt.lr_policy == 'step':
         scheduler = lr_scheduler.StepLR(optimizer, step_size=opt.lr_decay_iters, gamma=0.1)
@@ -115,6 +120,7 @@ def init_weights(net, init_type='normal', init_gain=0.02):
     We use 'normal' in the original pix2pix and CycleGAN paper. But xavier and kaiming might
     work better for some applications. Feel free to try yourself.
     """
+
     def init_func(m):  # define the initialization function
         classname = m.__class__.__name__
         if hasattr(m, 'weight') and (classname.find('Conv') != -1 or classname.find('Linear') != -1):
@@ -130,7 +136,8 @@ def init_weights(net, init_type='normal', init_gain=0.02):
                 raise NotImplementedError('initialization method [%s] is not implemented' % init_type)
             if hasattr(m, 'bias') and m.bias is not None:
                 init.constant_(m.bias.data, 0.0)
-        elif classname.find('BatchNorm2d') != -1:  # BatchNorm Layer's weight is not a matrix; only normal distribution applies.
+        elif classname.find(
+                'BatchNorm2d') != -1:  # BatchNorm Layer's weight is not a matrix; only normal distribution applies.
             init.normal_(m.weight.data, 1.0, init_gain)
             init.constant_(m.bias.data, 0.0)
 
@@ -148,14 +155,15 @@ def init_net(net, init_type='normal', init_gain=0.02, gpu_ids=[]):
     Return an initialized network.
     """
     if len(gpu_ids) > 0:
-        assert(torch.cuda.is_available())
+        assert (torch.cuda.is_available())
         net.to(gpu_ids[0])
         net = torch.nn.DataParallel(net, gpu_ids)  # multi-GPUs
     init_weights(net, init_type, init_gain=init_gain)
     return net
 
 
-def define_G(input_nc, output_nc, ngf, netG, embedding, device, norm='batch', use_dropout=False, init_type='normal', init_gain=0.02, gpu_ids=[]):
+def define_G(input_nc, output_nc, ngf, netG, embedding, device, norm='batch', use_dropout=False, init_type='normal',
+             init_gain=0.02, gpu_ids=[]):
     """Create a generator
 
     Parameters:
@@ -190,16 +198,22 @@ def define_G(input_nc, output_nc, ngf, netG, embedding, device, norm='batch', us
         net = ResnetGenerator(input_nc, output_nc, ngf, norm_layer=norm_layer, use_dropout=use_dropout, n_blocks=9)
     elif netG == 'resnet_6blocks':
         net = ResnetGenerator(input_nc, output_nc, ngf, norm_layer=norm_layer, use_dropout=use_dropout, n_blocks=6)
+    elif netG == 'unet_64':
+        net = UnetGenerator(input_nc, output_nc, 6, embedding, device, ngf, norm_layer=norm_layer,
+                            use_dropout=use_dropout)
     elif netG == 'unet_128':
-        net = UnetGenerator(input_nc, output_nc, 7, embedding, device, ngf, norm_layer=norm_layer, use_dropout=use_dropout)
+        net = UnetGenerator(input_nc, output_nc, 7, embedding, device, ngf, norm_layer=norm_layer,
+                            use_dropout=use_dropout)
     elif netG == 'unet_256':
-        net = UnetGenerator(input_nc, output_nc, 8, embedding, device, ngf, norm_layer=norm_layer, use_dropout=use_dropout)
+        net = UnetGenerator(input_nc, output_nc, 8, embedding, device, ngf, norm_layer=norm_layer,
+                            use_dropout=use_dropout)
     else:
         raise NotImplementedError('Generator model name [%s] is not recognized' % netG)
     return init_net(net, init_type, init_gain, gpu_ids)
 
 
-def define_D(input_nc, ndf, netD, embedding, device, n_layers_D=3, norm='batch', init_type='normal', init_gain=0.02, gpu_ids=[]):
+def define_D(input_nc, ndf, netD, embedding, device, n_layers_D=3, norm='batch', init_type='normal', init_gain=0.02,
+             gpu_ids=[]):
     """Create a discriminator
 
     Parameters:
@@ -236,7 +250,7 @@ def define_D(input_nc, ndf, netD, embedding, device, n_layers_D=3, norm='batch',
         net = NLayerDiscriminator(input_nc, embedding, device, ndf, n_layers=3, norm_layer=norm_layer)
     elif netD == 'n_layers':  # more options
         net = NLayerDiscriminator(input_nc, embedding, device, ndf, n_layers_D, norm_layer=norm_layer)
-    elif netD == 'pixel':     # classify if each pixel is real or fake
+    elif netD == 'pixel':  # classify if each pixel is real or fake
         net = PixelDiscriminator(input_nc, ndf, norm_layer=norm_layer)
     else:
         raise NotImplementedError('Discriminator model name [%s] is not recognized' % netD)
@@ -293,16 +307,16 @@ class GANLoss(nn.Module):
         else:
             target_tensor = self.fake_label
 
-        #print('prediction keys', prediction.keys())
-        #print(prediction['fake_AB']['fake_AB'])
-        current_key = list(prediction .keys())[0]
-         #inputs[0][current_key]
+        # print('prediction keys', prediction.keys())
+        # print(prediction['fake_AB']['fake_AB'])
+        current_key = list(prediction.keys())[0]
+        # inputs[0][current_key]
 
-        #target_tensor.expand_as(prediction['fake_AB']['fake_AB'])
+        # target_tensor.expand_as(prediction['fake_AB']['fake_AB'])
         if current_key == 'real_AB':
-            return dict(real_AB = target_tensor.expand_as(prediction[current_key]), true_labels = prediction['true_labels'])
+            return dict(real_AB=target_tensor.expand_as(prediction[current_key]), true_labels=prediction['true_labels'])
         if current_key == 'fake_AB':
-            return dict(fake_AB = target_tensor.expand_as(prediction[current_key]), true_labels = prediction['true_labels'])
+            return dict(fake_AB=target_tensor.expand_as(prediction[current_key]), true_labels=prediction['true_labels'])
 
     def __call__(self, prediction, target_is_real):
         """Calculate loss given Discriminator's output and grount truth labels.
@@ -316,7 +330,7 @@ class GANLoss(nn.Module):
         """
         if self.gan_mode in ['lsgan', 'vanilla']:
             target_tensor = self.get_target_tensor(prediction, target_is_real)
-            #print(prediction[list(prediction.keys())[0]])
+            # print(prediction[list(prediction.keys())[0]])
             loss = self.loss(prediction[list(prediction.keys())[0]], target_tensor[list(prediction.keys())[0]])
         elif self.gan_mode == 'wgangp':
             if target_is_real:
@@ -341,13 +355,14 @@ def cal_gradient_penalty(netD, real_data, fake_data, device, type='mixed', const
     Returns the gradient penalty loss
     """
     if lambda_gp > 0.0:
-        if type == 'real':   # either use real images, fake images, or a linear interpolation of two.
+        if type == 'real':  # either use real images, fake images, or a linear interpolation of two.
             interpolatesv = real_data
         elif type == 'fake':
             interpolatesv = fake_data
         elif type == 'mixed':
             alpha = torch.rand(real_data.shape[0], 1, device=device)
-            alpha = alpha.expand(real_data.shape[0], real_data.nelement() // real_data.shape[0]).contiguous().view(*real_data.shape)
+            alpha = alpha.expand(real_data.shape[0], real_data.nelement() // real_data.shape[0]).contiguous().view(
+                *real_data.shape)
             interpolatesv = alpha * real_data + ((1 - alpha) * fake_data)
         else:
             raise NotImplementedError('{} not implemented'.format(type))
@@ -357,7 +372,7 @@ def cal_gradient_penalty(netD, real_data, fake_data, device, type='mixed', const
                                         grad_outputs=torch.ones(disc_interpolates.size()).to(device),
                                         create_graph=True, retain_graph=True, only_inputs=True)
         gradients = gradients[0].view(real_data.size(0), -1)  # flat the data
-        gradient_penalty = (((gradients + 1e-16).norm(2, dim=1) - constant) ** 2).mean() * lambda_gp        # added eps
+        gradient_penalty = (((gradients + 1e-16).norm(2, dim=1) - constant) ** 2).mean() * lambda_gp  # added eps
         return gradient_penalty, gradients
     else:
         return 0.0, None
@@ -369,7 +384,8 @@ class ResnetGenerator(nn.Module):
     We adapt Torch code and idea from Justin Johnson's neural style transfer project(https://github.com/jcjohnson/fast-neural-style)
     """
 
-    def __init__(self, input_nc, output_nc, ngf=64, norm_layer=nn.BatchNorm2d, use_dropout=False, n_blocks=6, padding_type='reflect'):
+    def __init__(self, input_nc, output_nc, ngf=64, norm_layer=nn.BatchNorm2d, use_dropout=False, n_blocks=6,
+                 padding_type='reflect'):
         """Construct a Resnet-based generator
 
         Parameters:
@@ -381,7 +397,7 @@ class ResnetGenerator(nn.Module):
             n_blocks (int)      -- the number of ResNet blocks
             padding_type (str)  -- the name of padding layer in conv layers: reflect | replicate | zero
         """
-        assert(n_blocks >= 0)
+        assert (n_blocks >= 0)
         super(ResnetGenerator, self).__init__()
         if type(norm_layer) == functools.partial:
             use_bias = norm_layer.func == nn.InstanceNorm2d
@@ -401,9 +417,10 @@ class ResnetGenerator(nn.Module):
                       nn.ReLU(True)]
 
         mult = 2 ** n_downsampling
-        for i in range(n_blocks):       # add ResNet blocks
+        for i in range(n_blocks):  # add ResNet blocks
 
-            model += [ResnetBlock(ngf * mult, padding_type=padding_type, norm_layer=norm_layer, use_dropout=use_dropout, use_bias=use_bias)]
+            model += [ResnetBlock(ngf * mult, padding_type=padding_type, norm_layer=norm_layer, use_dropout=use_dropout,
+                                  use_bias=use_bias)]
 
         for i in range(n_downsampling):  # add upsampling layers
             mult = 2 ** (n_downsampling - i)
@@ -487,7 +504,8 @@ class ResnetBlock(nn.Module):
 class UnetGenerator(nn.Module):
     """Create a Unet-based generator"""
 
-    def __init__(self, input_nc, output_nc, num_downs, embedding, device, ngf=64, norm_layer=nn.BatchNorm2d, use_dropout=False):
+    def __init__(self, input_nc, output_nc, num_downs, embedding, device, ngf=64, norm_layer=nn.BatchNorm2d,
+                 use_dropout=False):
         """Construct a Unet generator
         Parameters:
             input_nc (int)  -- the number of channels in input images
@@ -500,23 +518,30 @@ class UnetGenerator(nn.Module):
         We construct the U-Net from the innermost layer to the outermost layer.
         It is a recursive process.
         """
-        #print('UnetGenerator params: %d input_nc, %d output_nc, %d num_downs, %d ngf' % (input_nc, output_nc, num_downs, ngf))
+        # print('UnetGenerator params: %d input_nc, %d output_nc, %d num_downs, %d ngf' % (input_nc, output_nc, num_downs, ngf))
 
         super(UnetGenerator, self).__init__()
         # construct unet structure
-        unet_block = UnetSkipConnectionBlock(ngf * 8, ngf * 8, device, embedding, input_nc=None, submodule=None, norm_layer=norm_layer, innermost=True)  # add the innermost layer
-        for i in range(num_downs - 5):          # add intermediate layers with ngf * 8 filters
-            unet_block = UnetSkipConnectionBlock(ngf * 8, ngf * 8, device, embedding=None, input_nc=None, submodule=unet_block, norm_layer=norm_layer, use_dropout=use_dropout)
+        unet_block = UnetSkipConnectionBlock(ngf * 8, ngf * 8, device, embedding, input_nc=None, submodule=None,
+                                             norm_layer=norm_layer, innermost=True)  # add the innermost layer
+        for i in range(num_downs - 5):  # add intermediate layers with ngf * 8 filters
+            unet_block = UnetSkipConnectionBlock(ngf * 8, ngf * 8, device, embedding=None, input_nc=None,
+                                                 submodule=unet_block, norm_layer=norm_layer, use_dropout=use_dropout)
         # gradually reduce the number of filters from ngf * 8 to ngf
-        unet_block = UnetSkipConnectionBlock(ngf * 4, ngf * 8, device, embedding=None, input_nc=None, submodule=unet_block, norm_layer=norm_layer)
-        unet_block = UnetSkipConnectionBlock(ngf * 2, ngf * 4, device, embedding=None, input_nc=None, submodule=unet_block, norm_layer=norm_layer)
-        unet_block = UnetSkipConnectionBlock(ngf, ngf * 2, device, embedding=None, input_nc=None, submodule=unet_block, norm_layer=norm_layer)
-        self.model = UnetSkipConnectionBlock(output_nc, ngf, device, embedding=None, input_nc=input_nc, submodule=unet_block, outermost=True, norm_layer=norm_layer)  # add the outermost layer
+        unet_block = UnetSkipConnectionBlock(ngf * 4, ngf * 8, device, embedding=None, input_nc=None,
+                                             submodule=unet_block, norm_layer=norm_layer)
+        unet_block = UnetSkipConnectionBlock(ngf * 2, ngf * 4, device, embedding=None, input_nc=None,
+                                             submodule=unet_block, norm_layer=norm_layer)
+        unet_block = UnetSkipConnectionBlock(ngf, ngf * 2, device, embedding=None, input_nc=None, submodule=unet_block,
+                                             norm_layer=norm_layer)
+        self.model = UnetSkipConnectionBlock(output_nc, ngf, device, embedding=None, input_nc=input_nc,
+                                             submodule=unet_block, outermost=True,
+                                             norm_layer=norm_layer)  # add the outermost layer
         # print('MODEL:', self.model)
 
     def forward(self, input):
         """Standard forward"""
-        #print('unetgenerator forward')
+        # print('unetgenerator forward')
         return self.model(input)
 
 
@@ -628,15 +653,19 @@ class UnetSkipConnectionBlock(nn.Module):
         """
 
         if self.outermost:
-            #print('-outermost:')
-            #print('\treal_A', kwargs['real_A'].shape)
+            # print('-outermost:')
+            # print('\treal_A', kwargs['real_A'].shape)
             return self.model(kwargs)
         elif self.innermost:
-            #print('-innermost')
-            #print('\treal_A', kwargs['real_A'].shape)
+            # print('-innermost')
+            # print('\treal_A', kwargs['real_A'].shape)
 
-            tensor_labels = torch.tensor(np.array([int(d) for d in kwargs['true_labels']]))  # Create tensor of the labels
-            embeddings = self.embedding(tensor_labels.to(self.device))
+            tensor_labels = torch.tensor(
+                np.array([int(d) for d in kwargs['true_labels']]))  # Create tensor of the labels
+            if torch.cuda.is_available():
+                tensor_labels = tensor_labels.cuda()
+            # embeddings = self.embedding(tensor_labels.to(self.device))
+            embeddings = self.embedding(tensor_labels.to(torch.int64))
 
             # embeddings_reshaped = embeddings.view(8, 1, 2, 2)   # Reshape embedding from (8,4) to (8,1,2,2)
             # activation = torch.cat([kwargs['real_A'], embeddings_reshaped], 0)
@@ -646,17 +675,17 @@ class UnetSkipConnectionBlock(nn.Module):
             #
             batch_size = kwargs['real_A'].shape[0]
 
-            embeddings_reshaped = embeddings.view(batch_size, 512, 2, 2)   # Reshape embedding from (8,4) to (8,1,2,2)
-            #print('\tembeddings', embeddings_reshaped.shape)
+            embeddings_reshaped = embeddings.view(batch_size, 512, 2, 2)  # Reshape embedding from (8,4) to (8,1,2,2)
+            # print('\tembeddings', embeddings_reshaped.shape)
             activation = kwargs['real_A'] + embeddings_reshaped
-            #print('\tactivation', activation.shape)
+            # print('\tactivation', activation.shape)
             tensor = torch.cat([activation, self.model(kwargs)['real_A']], 1)
-            #print('\ttensor', tensor.shape)
+            # print('\ttensor', tensor.shape)
 
             return dict(real_A=tensor, true_labels=kwargs['true_labels'])
-        else:   # add skip connections
-            #print('-skip connections')
-            #print('\treal_A', kwargs['real_A'].shape)
+        else:  # add skip connections
+            # print('-skip connections')
+            # print('\treal_A', kwargs['real_A'].shape)
             tensor = torch.cat([kwargs['real_A'], self.model(kwargs)['real_A']], 1)
             return dict(real_A=tensor, true_labels=kwargs['true_labels'])
 
@@ -686,13 +715,13 @@ class NLayerDiscriminator(nn.Module):
         kw = 4
         padw = 1
         sequence = [nn.Conv2d(input_nc, ndf, kernel_size=kw, stride=2, padding=padw), nn.LeakyReLU(0.2, True)]
-        #for element in sequence:
+        # for element in sequence:
         #    element.register_forward_pre_hook(pre_fwd_hook_discr)
         #    element.register_forward_hook(fwd_hook_discr)
         nf_mult = 1
         nf_mult_prev = 1
 
-        n=1
+        n = 1
         nf_mult_prev = nf_mult
         nf_mult = min(2 ** n, 8)
         sequence += [
@@ -700,10 +729,9 @@ class NLayerDiscriminator(nn.Module):
             norm_layer(ndf * nf_mult),
             nn.LeakyReLU(0.2, True)
         ]
-        #for element in sequence:
+        # for element in sequence:
         #    element.register_forward_pre_hook(pre_fwd_hook_discr)
         #    element.register_forward_hook(fwd_hook_discr)
-
 
         for n in range(2, n_layers):  # gradually increase the number of filters
             nf_mult_prev = nf_mult
@@ -713,10 +741,9 @@ class NLayerDiscriminator(nn.Module):
                 norm_layer(ndf * nf_mult),
                 nn.LeakyReLU(0.2, True)
             ]
-        #for element in sequence:
+        # for element in sequence:
         #    element.register_forward_pre_hook(pre_fwd_hook_discr)
         #    element.register_forward_hook(fwd_hook_discr)
-
 
         nf_mult_prev = nf_mult
         nf_mult = min(2 ** n_layers, 8)
@@ -725,12 +752,12 @@ class NLayerDiscriminator(nn.Module):
             norm_layer(ndf * nf_mult),
             nn.LeakyReLU(0.2, True)
         ]
-        #for element in sequence:
+        # for element in sequence:
         #    element.register_forward_pre_hook(pre_fwd_hook_discr)
         #    element.register_forward_hook(fwd_hook_discr)
 
-
-        sequence += [nn.Conv2d(ndf * nf_mult, 1, kernel_size=kw, stride=1, padding=padw)]  # output 1 channel prediction map
+        sequence += [
+            nn.Conv2d(ndf * nf_mult, 1, kernel_size=kw, stride=1, padding=padw)]  # output 1 channel prediction map
         for element in sequence:
             element.register_forward_pre_hook(pre_fwd_hook_discr)
             element.register_forward_hook(fwd_hook_discr)
@@ -739,31 +766,34 @@ class NLayerDiscriminator(nn.Module):
 
     def forward(self, kwargs):
         """Standard forward."""
-        #print('NLayerDiscriminator', list(kwargs.keys())[0])
+        # print('NLayerDiscriminator', list(kwargs.keys())[0])
 
-        #print('\t forward D shape:', kwargs[list(kwargs.keys())[0]].shape) #8, 6, 128, 128
+        # print('\t forward D shape:', kwargs[list(kwargs.keys())[0]].shape) #8, 6, 128, 128
         tensor_labels = torch.tensor(np.array([int(d) for d in kwargs['true_labels']]))  # Create tensor of the labels
-        embeddings = self.embedding(tensor_labels.to(self.device))
-        batch_size = kwargs[list(kwargs.keys())[0]].shape[0]
+        if torch.cuda.is_available():
+            tensor_labels = tensor_labels.cuda()
+        # embeddings = self.embedding(tensor_labels.to(self.device))
+        embeddings = self.embedding(tensor_labels.to(torch.int64))
 
-        embeddings_reshaped = embeddings.view(batch_size, 6, 128, 128)   # Reshape embedding from (8,4) to (8,1,2,2)
-        #print('\tembeddings', embeddings_reshaped.shape)
+        batch_size = kwargs[list(kwargs.keys())[0]].shape[0]
+        embeddings_reshaped = embeddings.view(batch_size, 6, 128, 128)  # Reshape embedding from (8,4) to (8,1,2,2)
+        # print('\tembeddings', embeddings_reshaped.shape)
         activation = kwargs[list(kwargs.keys())[0]] + embeddings_reshaped
-        #print('\tactivation', activation.shape)
-        #tensor = torch.cat([activation, self.model(kwargs)[list(kwargs.keys())[0]]], 1)
+        # print('\tactivation', activation.shape)
+        # tensor = torch.cat([activation, self.model(kwargs)[list(kwargs.keys())[0]]], 1)
         current_key = list(kwargs.keys())[0]
 
         if current_key == 'real_AB':
-            activation =  dict(real_AB=activation, true_labels=kwargs['true_labels'])
+            activation = dict(real_AB=activation, true_labels=kwargs['true_labels'])
         if current_key == 'fake_AB':
-            activation =  dict(fake_AB=activation, true_labels=kwargs['true_labels'])
+            activation = dict(fake_AB=activation, true_labels=kwargs['true_labels'])
 
         tensor = self.model(activation)
-        #print('tensor is:', type(tensor))
-        #print('forward key: ', current_key)
-
+        # print('tensor is:', type(tensor))
+        # print('forward key: ', current_key)
 
         return self.model(kwargs)
+
 
 class PixelDiscriminator(nn.Module):
     """Defines a 1x1 PatchGAN discriminator (pixelGAN)"""
