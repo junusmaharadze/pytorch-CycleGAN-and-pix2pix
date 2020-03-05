@@ -29,7 +29,7 @@ class AlignedDataset(BaseDataset):
                 AB_path, label = line.replace('\n', '').split(' ')
                 self.true_labels[AB_path] = label
 
-        print('self.true_labels saved in AlignedDataset class')
+        # print('self.true_labels saved in AlignedDataset class')
         assert(self.opt.load_size >= self.opt.crop_size)   # crop_size should be smaller than the size of loaded image
         self.input_nc = self.opt.output_nc if self.opt.direction == 'BtoA' else self.opt.input_nc
         self.output_nc = self.opt.input_nc if self.opt.direction == 'BtoA' else self.opt.output_nc

@@ -467,7 +467,7 @@ class UnetGenerator(nn.Module):
         We construct the U-Net from the innermost layer to the outermost layer.
         It is a recursive process.
         """
-        print('UnetGenerator params: %d input_nc, %d output_nc, %d num_downs, %d ngf' % (input_nc, output_nc, num_downs, ngf))
+        # print('UnetGenerator params: %d input_nc, %d output_nc, %d num_downs, %d ngf' % (input_nc, output_nc, num_downs, ngf))
 
         super(UnetGenerator, self).__init__()
         # construct unet structure
@@ -483,7 +483,7 @@ class UnetGenerator(nn.Module):
 
     def forward(self, input):
         """Standard forward"""
-        print('unetgenerator forward')
+        # print('unetgenerator forward')
         return self.model(input)
 
 
@@ -595,12 +595,12 @@ class UnetSkipConnectionBlock(nn.Module):
         """
 
         if self.outermost:
-            print('-outermost:')
-            print('\treal_A', kwargs['real_A'].shape)
+            # print('-outermost:')
+            # print('\treal_A', kwargs['real_A'].shape)
             return self.model(kwargs)
         elif self.innermost:
-            print('-innermost')
-            print('\treal_A', kwargs['real_A'].shape)
+            # print('-innermost')
+            # print('\treal_A', kwargs['real_A'].shape)
 
             tensor_labels = torch.tensor(np.array([int(d) for d in kwargs['true_labels']]))  # Create tensor of the labels
             embeddings = self.embedding(tensor_labels.to(self.device))
@@ -614,16 +614,16 @@ class UnetSkipConnectionBlock(nn.Module):
             batch_size = kwargs['real_A'].shape[0]
 
             embeddings_reshaped = embeddings.view(batch_size, 512, 2, 2)   # Reshape embedding from (8,4) to (8,1,2,2)
-            print('\tembeddings', embeddings_reshaped.shape)
+            # print('\tembeddings', embeddings_reshaped.shape)
             activation = kwargs['real_A'] + embeddings_reshaped
-            print('\tactivation', activation.shape)
+            # print('\tactivation', activation.shape)
             tensor = torch.cat([activation, self.model(kwargs)['real_A']], 1)
-            print('\ttensor', tensor.shape)
+            # print('\ttensor', tensor.shape)
 
             return dict(real_A=tensor, true_labels=kwargs['true_labels'])
         else:   # add skip connections
-            print('-skip connections')
-            print('\treal_A', kwargs['real_A'].shape)
+            # print('-skip connections')
+            # print('\treal_A', kwargs['real_A'].shape)
             tensor = torch.cat([kwargs['real_A'], self.model(kwargs)['real_A']], 1)
             return dict(real_A=tensor, true_labels=kwargs['true_labels'])
 
@@ -673,7 +673,7 @@ class NLayerDiscriminator(nn.Module):
 
     def forward(self, input):
         """Standard forward."""
-        print('NLayerDiscriminator', input.shape)
+        # print('NLayerDiscriminator', input.shape)
         return self.model(input)
 
 

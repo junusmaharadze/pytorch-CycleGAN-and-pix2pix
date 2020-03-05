@@ -105,17 +105,17 @@ class Pix2PixModel(BaseModel):
     def forward(self):
         """Run forward pass; called by both functions <optimize_parameters> and <test>."""
         # embedding lookup here
-        print('pix2pix forward')
+        # print('pix2pix forward')
 
         dict_A = {'real_A': self.real_A, 'true_labels': self.true_label}
         self.fake_B = self.netG(dict_A)['real_A']  # G(A)
         # self.fake_B = self.netG(self.real_A)  # G(A)
-        print('fake_B')
+        # print('fake_B')
 
     def backward_D(self):
         """Calculate GAN loss for the discriminator"""
         # Fake; stop backprop to the generator by detaching fake_B
-        print('backward_D')
+        # print('backward_D')
         fake_AB = torch.cat((self.real_A, self.fake_B), 1)  # we use conditional GANs; we need to feed both input and output to the discriminator
         pred_fake = self.netD(fake_AB.detach())
         self.loss_D_fake = self.criterionGAN(pred_fake, False)
@@ -130,7 +130,7 @@ class Pix2PixModel(BaseModel):
     def backward_G(self):
         """Calculate GAN and L1 loss for the generator"""
         # First, G(A) should fake the discriminator
-        print('backward_G')
+        # print('backward_G')
         fake_AB = torch.cat((self.real_A, self.fake_B), 1)
         pred_fake = self.netD(fake_AB)
         self.loss_G_GAN = self.criterionGAN(pred_fake, True)
