@@ -199,8 +199,9 @@ def define_G(input_nc, output_nc, ngf, netG, embedding, device, norm='batch', us
     elif netG == 'resnet_6blocks':
         net = ResnetGenerator(input_nc, output_nc, ngf, norm_layer=norm_layer, use_dropout=use_dropout, n_blocks=6)
     elif netG == 'unet_64':
-        net = UnetGenerator(input_nc, output_nc, 6, embedding, device, ngf, norm_layer=norm_layer,
-                            use_dropout=use_dropout)
+        raise NotImplementedError('The ' + netG + 'has not been implemented')
+        # net = UnetGenerator(input_nc, output_nc, 6, embedding, device, ngf, norm_layer=norm_layer,
+        #                     use_dropout=use_dropout)
     elif netG == 'unet_128':
         net = UnetGenerator(input_nc, output_nc, 7, embedding, device, ngf, norm_layer=norm_layer,
                             use_dropout=use_dropout)
