@@ -2,7 +2,7 @@ import os.path
 from data.base_dataset import BaseDataset, get_params, get_transform
 from data.image_folder import make_dataset
 from PIL import Image
-
+import re
 
 class AlignedDataset(BaseDataset):
     """A dataset class for paired image dataset.
@@ -63,9 +63,10 @@ class AlignedDataset(BaseDataset):
 
         A = A_transform(A)
         B = B_transform(B)
-	
+
         # print(self.true_labels[AB_path])
-        return {'A': A, 'B': B, 'A_paths': AB_path, 'B_paths': AB_path, 'true_label': self.true_labels[AB_path], 'labels_dict': self.true_labels}
+        look_for_path = re.sub('/disk/scratch/s1885912/datasets', '.', AB_path)
+        return {'A': A, 'B': B, 'A_paths': AB_path, 'B_paths': AB_path, 'true_label': self.true_labels[look_for_path], 'labels_dict': self.true_labels}
 
     def __len__(self):
         """Return the total number of images in the dataset."""
