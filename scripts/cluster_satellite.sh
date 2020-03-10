@@ -29,12 +29,13 @@ export TMPDIR=/disk/scratch/${STUDENT_ID}/
 export TMP=/disk/scratch/${STUDENT_ID}/
 
 mkdir -p ${TMP}/datasets/
-export DATASET_DIR=${TMP}datasets/AB
+export DATASET_DIR=${TMP}datasets/
 
 # Activate the relevant virtual environment:
-rsync -ua /home/${STUDENT_ID}/pytorch-CycleGAN-and-pix2pix/tars/AB.tar.gz "${DATASET_DIR}"
+echo ${STUDENT_ID}
+rsync -ua /home/${STUDENT_ID}/pytorch-CycleGAN-and-pix2pix/tars/AB.tar.gz ${DATASET_DIR}
 echo $DATASET_DIR
-tar -xzf "${DATASET_DIR}/AB.tar.gz" -C "${DATASET_DIR}"
+tar -xzf ${DATASET_DIR}/AB.tar.gz -C ${DATASET_DIR}
 
 source /home/${STUDENT_ID}/miniconda3/bin/activate mlp
 
