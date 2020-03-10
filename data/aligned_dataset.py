@@ -1,7 +1,7 @@
 import os.path
 from data.base_dataset import BaseDataset, get_params, get_transform
 from data.image_folder import make_dataset
-from PIL import Image
+from PIL import Image, ImageFile
 import re
 
 class AlignedDataset(BaseDataset):
@@ -49,6 +49,7 @@ class AlignedDataset(BaseDataset):
         """
         # read a image given a random integer index
         AB_path = self.AB_paths[index]
+        ImageFile.LOAD_TRUNCATED_IMAGES = True
         AB = Image.open(AB_path).convert('RGB')
         # split AB image into A and B
         w, h = AB.size
