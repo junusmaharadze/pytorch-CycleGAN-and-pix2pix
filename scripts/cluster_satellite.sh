@@ -2,7 +2,7 @@
 #SBATCH -N 1      # nodes requested
 #SBATCH -n 1      # tasks requested
 #SBATCH --partition=Teach-Standard
-#SBATCH --gres=gpu:2
+#SBATCH --gres=gpu:8
 #SBATCH --mem=7500  # memory in Mb
 #SBATCH --time=0-08:00:00
 
@@ -33,9 +33,9 @@ export DATASET_DIR=${TMP}datasets/
 
 # Activate the relevant virtual environment:
 echo ${STUDENT_ID}
-rsync -ua /home/${STUDENT_ID}/pytorch-CycleGAN-and-pix2pix/tars/AB.tar.gz ${DATASET_DIR}
+#rsync -ua /home/${STUDENT_ID}/pytorch-CycleGAN-and-pix2pix/tars/AB.tar.gz ${DATASET_DIR}
 echo $DATASET_DIR
-tar -xzf ${DATASET_DIR}/AB.tar.gz -C ${DATASET_DIR}
+#tar -xzf ${DATASET_DIR}/AB.tar.gz -C ${DATASET_DIR}
 
 source .env/bin/activate
 #source /home/${STUDENT_ID}/miniconda3/bin/activate mlp
