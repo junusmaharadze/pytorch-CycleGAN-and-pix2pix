@@ -55,8 +55,8 @@ class Pix2PixModel(BaseModel):
             self.model_names = ['G']
 
         # Image at lowest level: torch.Size([8, 512, 2, 2]) so emb_dim = 512*2*2=2048
-        self.embedding = torch.nn.Embedding(24, 512 * 2 * 2)
-        self.embedding_discr = torch.nn.Embedding(24, 6 * 128 * 128)
+        self.embedding = torch.nn.Embedding(24, 64 * 2 * 2)        #(24, 512 * 2 * 2)
+        self.embedding_discr = torch.nn.Embedding(24,6 * 16 * 128)                  #(24, 6 * 128 * 128)
         # self.embedding = torch.nn.Embedding(4, 4)
 
         # or one-hot encoding
@@ -64,11 +64,11 @@ class Pix2PixModel(BaseModel):
         # self.projection_layer = nn.Linear(4, 512 * 2 * 2)
 
         # define networks (both generator and discriminator)
-        self.netG = networks.define_G(opt.input_nc, opt.output_nc, opt.ngf, opt.netG, self.embedding, self.device, opt.norm,
+        self.netG, self.embedding = networks.define_G(opt.input_nc, opt.output_nc, opt.ngf, opt.netG, self.embedding, self.device, opt.norm,
                                       not opt.no_dropout, opt.init_type, opt.init_gain, self.gpu_ids)
 
         if self.isTrain:  # define a discriminator; conditional GANs need to take both input and output images; Therefore, #channels for D is input_nc + output_nc
-            self.netD = networks.define_D(opt.input_nc + opt.output_nc, opt.ndf, opt.netD, self.embedding_discr, self.device,
+            self.netD, self.embedding = networks.define_D(opt.input_nc + opt.output_nc, opt.ndf, opt.netD, self.embedding_discr, self.device,
                                           opt.n_layers_D, opt.norm, opt.init_type, opt.init_gain, self.gpu_ids)
 
         if self.isTrain:
