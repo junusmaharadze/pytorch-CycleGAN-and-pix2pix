@@ -38,7 +38,7 @@ def save_images(webpage, visuals, image_path, labels, aspect_ratio=1.0, width=25
         save_path = os.path.join(image_dir, image_name)
         util.save_image(im, save_path, aspect_ratio=aspect_ratio)
         ims.append(image_name)
-        txts.append(label + labels)
+        txts.append(label + str(labels))
         links.append(image_name)
     webpage.add_images(ims, txts, links, width=width)
 
