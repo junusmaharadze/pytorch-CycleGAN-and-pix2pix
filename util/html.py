@@ -91,7 +91,7 @@ class HTML:
                                 img(style="width:%dpx" % width, src=os.path.join('images', im))
                             br()
                             print(label)
-                            p(txt + str(label[0]) + str(disaster_type_names[label[0]]))
+                            p(txt + str(label[0]) + str(disaster_type_names[int(label[0])]))
 
     def save(self):
         """save the current content to the HMTL file"""
