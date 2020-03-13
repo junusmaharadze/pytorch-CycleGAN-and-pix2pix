@@ -12,33 +12,6 @@ if sys.version_info[0] == 2:
 else:
     VisdomExceptionBase = ConnectionError
 
-disaster_type_names = {
-    0: 'flooding-0',
-    1: 'flooding-1',
-    2: 'flooding-2',
-    3: 'flooding-3',
-    4: 'fire-0',
-    5: 'fire-1',
-    6: 'fire-2',
-    7: 'fire-3',
-    8: 'wind-0',
-    9: 'wind-1',
-    10: 'wind-2',
-    11: 'wind-3',
-    12: 'tsunami-0',
-    13: 'tsunami-1',
-    14: 'tsunami-2',
-    15: 'tsunami-3',
-    16: 'earthquake-0',
-    17: 'earthquake-1',
-    18: 'earthquake-2',
-    19: 'earthquake-3',
-    20: 'volcano-0',
-    21: 'volcano-1',
-    22: 'volcano-2',
-    23: 'volcano-3'
-}
-
 def save_images(webpage, visuals, image_path, labels, aspect_ratio=1.0, width=256):
     """Save images to the disk.
 
@@ -56,7 +29,7 @@ def save_images(webpage, visuals, image_path, labels, aspect_ratio=1.0, width=25
     name = os.path.splitext(short_path)[0]
 
     webpage.add_header(name)
-    ims, txts, links = [], [], []
+    ims, txts, links, labels = [], [], [], []
 
     for label, im_data in visuals.items():
         im = util.tensor2im(im_data)
@@ -64,9 +37,10 @@ def save_images(webpage, visuals, image_path, labels, aspect_ratio=1.0, width=25
         save_path = os.path.join(image_dir, image_name)
         util.save_image(im, save_path, aspect_ratio=aspect_ratio)
         ims.append(image_name)
-        txts.append(label + str(disaster_type_names[labels]))
+        txts.append(label)
         links.append(image_name)
-    webpage.add_images(ims, txts, links, width=width)
+        labels.append(labels)
+    webpage.add_images(ims, txts, links, labels, width=width)
 
 
 class Visualizer():
