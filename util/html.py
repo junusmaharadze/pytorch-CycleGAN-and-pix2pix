@@ -90,7 +90,8 @@ class HTML:
                             with a(href=os.path.join('images', link)):
                                 img(style="width:%dpx" % width, src=os.path.join('images', im))
                             br()
-                            p(txt + str(label), str(disaster_type_names[label]))
+                            print(label)
+                            p(txt + str(label) + str(disaster_type_names[label]))
 
     def save(self):
         """save the current content to the HMTL file"""
