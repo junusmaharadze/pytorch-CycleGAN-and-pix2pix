@@ -29,7 +29,7 @@ def save_images(webpage, visuals, image_path, labels, aspect_ratio=1.0, width=25
     name = os.path.splitext(short_path)[0]
 
     webpage.add_header(name)
-    ims, txts, links, labels = [], [], [], []
+    ims, txts, links, labels_list = [], [], [], []
 
     for label, im_data in visuals.items():
         im = util.tensor2im(im_data)
@@ -39,8 +39,8 @@ def save_images(webpage, visuals, image_path, labels, aspect_ratio=1.0, width=25
         ims.append(image_name)
         txts.append(label)
         links.append(image_name)
-        labels.append(labels)
-    webpage.add_images(ims, txts, links, labels, width=width)
+        labels_list.append(labels)
+    webpage.add_images(ims, txts, links, labels_list, width=width)
 
 
 class Visualizer():
