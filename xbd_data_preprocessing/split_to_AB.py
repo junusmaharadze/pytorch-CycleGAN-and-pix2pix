@@ -3,6 +3,7 @@ from random import shuffle
 import shutil
 import argparse
 from pathlib import Path
+import traceback
 
 
 # NOT USED - but we keep it since we might need it in the future
@@ -82,13 +83,23 @@ def move_to_single_category(input_dir, output_dir, satellite_labels, output_labe
             file_label_dict[file] = label
 
             try:
-                shutil.move(input_dir + '/A/' + file, output_dir + '/A/' + output_category + '/' + file)
-                shutil.move(input_dir + '/B/' + file, output_dir + '/B/' + output_category + '/' + file)
+                input_A_file = os.path.join(input_dir, 'A', file)
+                input_B_file = os.path.join(input_dir, 'B', file)
+                output_A_file = os.path.join(output_dir, 'A', output_category, file)
+                output_B_file = os.path.join(output_dir, 'B', output_category, file)
+
+                shutil.move(input_A_file, output_A_file)
+                shutil.move(input_B_file, output_B_file)
 
                 with open(output_labels_file, 'a') as f:
-                    f.write(output_dir + '/AB/' + output_category + '/' + file + ' ' + str(file_label_dict[file]) + '\n')
-            except:
+                    # Replace ../ with ./ at the beginning of the output_dir path
+                    if output_dir.startswith('../'):
+                        output_dir_local = output_dir.replace('../', './', 1)
+                    output_AB_file = os.path.join(output_dir_local, 'AB', output_category, file)
+                    f.write(output_AB_file + ' ' + str(file_label_dict[file]) + '\n')
+            except Exception as e:
                 print('Didnt move ', file)
+                print(repr(e))
 
 
 if __name__ == '__main__':
