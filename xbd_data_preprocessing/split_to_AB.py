@@ -86,7 +86,7 @@ def move_to_single_category(input_dir, output_dir, satellite_labels, output_labe
                 shutil.move(input_dir + '/B/' + file, output_dir + '/B/' + output_category + '/' + file)
 
                 with open(output_labels_file, 'a') as f:
-                    f.write(output_dir + '/B/' + output_category + '/' + file + ' ' + str(file_label_dict[file]) + '\n')
+                    f.write(output_dir + '/AB/' + output_category + '/' + file + ' ' + str(file_label_dict[file]) + '\n')
             except:
                 print('Didnt move ', file)
 
