@@ -47,12 +47,11 @@ for sp in splits:
             path_AB = os.path.join(img_fold_AB, name_AB)
             im_A = cv2.imread(path_A, cv2.IMREAD_UNCHANGED) # python2: cv2.CV_LOAD_IMAGE_COLOR; python3: cv2.IMREAD_COLOR
             im_B = cv2.imread(path_B, cv2.IMREAD_UNCHANGED) # python2: cv2.CV_LOAD_IMAGE_COLOR; python3: cv2.IMREAD_COLOR
-            try:
-                im_AB = np.concatenate([im_A, im_B], 1)
-                im_AB = Image.fromarray(im_AB.astype(np.uint8))
-                im_AB.save(path_AB)
-            except:
-                counter += 1
+            min_height = min(im_A.shape[0], im_B.shape[0])
+            min_width = min(im_A.shape[1], im_B.shape[1])
+            im_AB = np.concatenate([im_A[0:min_height, 0:min_width, :], im_B[0:min_height, 0:min_width, :]], 1)
+            im_AB = Image.fromarray(im_AB.astype(np.uint8))
+            im_AB.save(path_AB)
+
 
 print('Finished combine_A_and_B')
-print('Didnt combine', counter, 'images')
