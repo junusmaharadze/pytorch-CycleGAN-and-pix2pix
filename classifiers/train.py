@@ -8,100 +8,11 @@ import copy
 import matplotlib.pyplot as plt
 import numpy as np
 
-from torchvision import models, transforms
+from torchvision import models
 from torch.utils.data import DataLoader
 from tqdm import tqdm
-from PIL import Image
-from collections import defaultdict
 
-
-class XbdDataLoader(object):
-    """Custom data loader class for the xBD dataset. It requires the polygons and the labels file as input
-
-    Attributes:
-        data_dir (string): The path to the xBD_polygons_AB folder that contains subfolders A, B, and AB.
-        Only B is needed here
-        labels_file (string): The path to the labels textfile satellite_AB_labels.txt
-        paths_labels_dict (dict): Dictionary that contains the true label for each image, taken from satellite_AB_labels.txt
-        transforms (list): A list of transformations to apply to the data
-    """
-
-    def __init__(self, data_dir, labels_file, transforms):
-        self.data_dir = data_dir
-        self.labels_file = labels_file
-        self.transforms = transforms
-        self.paths_labels_dict = defaultdict(dict)
-        self._construct_labels_dict()
-
-    def _construct_labels_dict(self):
-        with open(self.labels_file, 'r') as f:
-            lines = [line.replace('\n', '') for line in f.readlines()]
-            for line in lines:
-                path, label = line.split(' ')
-                split_path = path.split('/')
-                filename = split_path[-1]
-                split_name = split_path[-2]
-
-                # Exclude labels for test
-                if split_name in ['train', 'val']:
-                    self.paths_labels_dict[split_name][filename] = int(label)
-
-    def _get_images_and_labels(self, split_name):
-        train_dir = os.path.join(self.data_dir, 'B', split_name)
-        print('{} dir: {}'.format(split_name, train_dir))
-        images = []
-        labels = []
-
-        for filename in os.listdir(train_dir):
-            image_path = os.path.join(train_dir, filename)
-            image = Image.open(image_path)
-            transformed_image = data_transforms[split_name](image)
-            images.append(transformed_image)
-
-            # Get class label from labels_file corresponding to each image
-            label = self.paths_labels_dict[split_name][filename]
-            labels.append(label)
-
-        return images, labels
-
-    @property
-    def train_data(self):
-        images, labels = self._get_images_and_labels('train')
-        return list(zip(images, labels))
-
-    @property
-    def val_data(self):
-        images, labels = self._get_images_and_labels('val')
-        return list(zip(images, labels))
-
-
-def test_model(model, loss_function, data_loader):
-    # set model in evaluation mode
-    model.eval()
-
-    current_loss = 0.0
-    current_acc = 0
-
-    # iterate over  the validation data
-    for i, (inputs, labels) in enumerate(data_loader):
-        # send the input/labels to the GPU
-        inputs = inputs.to(device)
-        labels = labels.to(device)
-
-        # forward
-        with torch.set_grad_enabled(False):
-            outputs = model(inputs)
-            _, predictions = torch.max(outputs, 1)
-            loss = loss_function(outputs, labels)
-
-        # statistics
-        current_loss += loss.item() * inputs.size(0)
-        current_acc += torch.sum(predictions == labels.data)
-
-    total_loss = current_loss / len(data_loader.dataset)
-    total_acc = current_acc.double() / len(data_loader.dataset)
-
-    print('Test Loss: {:.4f}; Accuracy: {:.4f}'.format(total_loss, total_acc))
+from xBD_data_loader import XbdDataLoader
 
 
 def train_val_model(model, dataloaders, criterion, optimizer, num_epochs):
@@ -178,6 +89,12 @@ def train_val_model(model, dataloaders, criterion, optimizer, num_epochs):
 
 
 def plot_curves(num_epochs, train_stats, val_stats):
+    """Plots accuracy and loss curves for training and validation
+    Args:
+        num_epochs (int): Number of epochs the model ran for
+        train_stats (dict): Accuracy and loss stats for training
+        val_stats (dict): Accuracy and loss stats for validation
+    """
     for metric in ['accuracy', 'loss']:
         train_stats[metric]
         val_stats[metric]
@@ -208,25 +125,6 @@ def save_checkpoint(model, checkpoint):
     print('Saved checkpoint: {}'.format(checkpoint_path))
 
 
-data_transforms = {
-    'train': transforms.Compose([
-        transforms.Resize((128, 128)),
-        # transforms.Rescale(142),
-        # transforms.RandomCrip(128),
-        # transforms.RandomHorizontalFlip(),
-        # transforms.RandomVerticalFlip(),
-        transforms.ToTensor(),
-        transforms.Normalize([0.485, 0.456, 0.406], [0.229, 0.224, 0.225])
-    ]),
-    'val': transforms.Compose([
-        transforms.Resize((128, 128)),
-        # transforms.CenterCrop(224),
-        transforms.ToTensor(),
-        transforms.Normalize([0.485, 0.456, 0.406], [0.229, 0.224, 0.225])
-    ])
-}
-
-
 if __name__ == '__main__':
     parser = argparse.ArgumentParser('Train classifier')
     parser.add_argument('--model', dest='model', type=str, default='resnet18',
@@ -237,15 +135,17 @@ if __name__ == '__main__':
                         help='Path to the labels txt, eg: ./datasets/xBD_datasets/xBD_polygons_AB_csv/satellite_AB_labels.txt')
     parser.add_argument('--num_epochs', dest='num_epochs', type=int, default=100,
                         help='Number of epochs')
+    parser.add_argument('--batch_size', dest='batch_size', type=int, default=16)
     parser.add_argument('--checkpoint_name', dest='checkpoint_name', type=str, default='resnet18_checkpoint',
                         help='The name of the best model\'s checkpoint to be used for inference')
+    parser.add_argument('--num_workers', dest='num_workers', type=int, default=0)
     args = parser.parse_args()
 
     # for arg in vars(args):
     #     print('[%s] = ' % arg, getattr(args, arg))
 
     device = torch.device('cuda' if torch.cuda.is_available() else 'cpu')
-    print('Device: ', device)
+    print('Device:', device)
 
     if args.model == 'resnet18':
         model = models.resnet18(pretrained=False, progress=True)
@@ -255,12 +155,12 @@ if __name__ == '__main__':
     model.to(device)  # Transfer the model to the GPU/CPU
 
     # Load the data
-    data_loader = XbdDataLoader(data_dir=args.data_dir, labels_file=args.labels_file, transforms=data_transforms)
+    data_loader = XbdDataLoader(data_dir=args.data_dir, labels_file=args.labels_file)
 
     train_data = data_loader.train_data
-    train_loader = DataLoader(train_data, batch_size=16, num_workers=0, shuffle=True)
+    train_loader = DataLoader(train_data, batch_size=args.batch_size, num_workers=args.num_workers, shuffle=True)
     val_data = data_loader.val_data
-    val_loader = DataLoader(val_data, batch_size=16, num_workers=0, shuffle=True)
+    val_loader = DataLoader(val_data, batch_size=args.batch_size, num_workers=args.num_workers, shuffle=True)
 
     dataloaders_dict = dict()
     dataloaders_dict['train'] = train_loader
