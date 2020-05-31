@@ -10,7 +10,6 @@ then
 fi
 
 echo "Mode=$mode"
-# echo
 
 MODEL=resnet18
 DATA_DIR=./datasets/xBD_datasets/xBD_polygons_AB
