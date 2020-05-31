@@ -188,10 +188,9 @@ def plot_curves(num_epochs, train_stats, val_stats):
         plt.plot(range(1, num_epochs + 1), train_stats[metric], label='Training')
         plt.plot(range(1, num_epochs + 1), val_stats[metric], label='Validation')
         plt.xticks(np.arange(1, num_epochs + 1, 1.0))
-
-    plt.ylim((0, 1.))
-    plt.legend()
-    plt.show()
+        plt.ylim((0, 1.))
+        plt.legend()
+        plt.show()
 
 
 def save_checkpoint(model, checkpoint):
@@ -274,10 +273,7 @@ if __name__ == '__main__':
     # Train and eval the model
     best_val_model, train_stats, val_stats = train_val_model(model, dataloaders_dict, loss_function, optimizer, args.num_epochs)
     # Plots functionality is not yet completed
-    # plot_curves(args.num_epochs, train_stats, val_stats)
+    plot_curves(args.num_epochs, train_stats, val_stats)
 
     # Save best validation model
     save_checkpoint(best_val_model, args.checkpoint_name)
-
-    # @TODO: Save best checkpoints
-    # @TODO: Write test function
