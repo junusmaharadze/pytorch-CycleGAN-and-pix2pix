@@ -117,8 +117,7 @@ def train_val_model(model, dataloaders, criterion, optimizer, num_epochs):
         print('Epoch {}/{}'.format(epoch + 1, num_epochs))
 
         # Each epoch has a training and validation phase
-        # for phase in ['train', 'val']:
-        for phase in dataloaders.keys():
+        for phase in ['train', 'val']:
             if phase == 'train':
                 model.train()  # Set model to training mode
             else:
@@ -180,7 +179,6 @@ def train_val_model(model, dataloaders, criterion, optimizer, num_epochs):
 
 def plot_curves(num_epochs, train_stats, val_stats):
     for metric in ['accuracy', 'loss']:
-        print(type(train_stats[metric]))
         train_stats[metric]
         val_stats[metric]
 
@@ -194,6 +192,21 @@ def plot_curves(num_epochs, train_stats, val_stats):
     plt.ylim((0, 1.))
     plt.legend()
     plt.show()
+
+
+def save_checkpoint(model, checkpoint):
+    """Saves best validation checkpoint in checkpoints_dir
+        Args:
+        model (torchvision.model): Best validation model's weights
+        checkpoint (string): Name of the checkpoint file
+    """
+    checkpoints_dir = './classifiers/checkpoints'
+    if not os.path.isdir(checkpoints_dir):
+        os.mkdir(checkpoints_dir)
+
+    checkpoint_path = os.path.join(checkpoints_dir, checkpoint + '.pth')
+    torch.save(model.state_dict(), checkpoint_path)
+    print('Saved checkpoint: {}'.format(checkpoint_path))
 
 
 data_transforms = {
@@ -225,6 +238,8 @@ if __name__ == '__main__':
                         help='Path to the labels txt, eg: ./datasets/xBD_datasets/xBD_polygons_AB_csv/satellite_AB_labels.txt')
     parser.add_argument('--num_epochs', dest='num_epochs', type=int, default=100,
                         help='Number of epochs')
+    parser.add_argument('--checkpoint_name', dest='checkpoint_name', type=str, default='resnet18_checkpoint',
+                        help='The name of the best model\'s checkpoint to be used for inference')
     args = parser.parse_args()
 
     # for arg in vars(args):
@@ -257,8 +272,12 @@ if __name__ == '__main__':
     optimizer = optim.Adam(model.parameters())  # Optimize all parameters
 
     # Train and eval the model
-    fit_model, train_stats, val_stats = train_val_model(model, dataloaders_dict, loss_function, optimizer, args.num_epochs)
-    plot_curves(args.num_epochs, train_stats, val_stats)
+    best_val_model, train_stats, val_stats = train_val_model(model, dataloaders_dict, loss_function, optimizer, args.num_epochs)
+    # Plots functionality is not yet completed
+    # plot_curves(args.num_epochs, train_stats, val_stats)
+
+    # Save best validation model
+    save_checkpoint(best_val_model, args.checkpoint_name)
 
     # @TODO: Save best checkpoints
     # @TODO: Write test function
