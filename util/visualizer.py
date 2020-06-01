@@ -2,6 +2,7 @@ import numpy as np
 import os
 import sys
 import ntpath
+import torchvision
 import time
 from . import util, html
 from subprocess import Popen, PIPE
@@ -36,12 +37,37 @@ def save_images(webpage, visuals, image_path, labels=[], aspect_ratio=1.0, width
         im = util.tensor2im(im_data)
         image_name = '%s_%s.png' % (name, label)
         save_path = os.path.join(image_dir, image_name)
+        print(save_path)
         util.save_image(im, save_path, aspect_ratio=aspect_ratio)
         ims.append(image_name)
         txts.append(label)
         links.append(image_name)
         labels_list.append(labels)
     webpage.add_images(ims, txts, links, labels_list, width=width)
+
+
+def save_interim_images(image_dir, visuals, image_path, labels=[], aspect_ratio=1.0, width=256):
+    """Save images to the disk.
+
+    Parameters:
+        webpage (the HTML class) -- the HTML webpage class that stores these imaegs (see html.py for more details)
+        visuals (OrderedDict)    -- an ordered dictionary that stores (name, images (either tensor or numpy) ) pairs
+        image_path (str)         -- the string is used to create image paths
+        aspect_ratio (float)     -- the aspect ratio of saved images
+        width (int)              -- the images will be resized to width x width
+
+    This function will save images stored in 'visuals' to the HTML file specified by 'webpage'.
+    """
+    short_path = ntpath.basename(image_path[0])
+    name = os.path.splitext(short_path)[0]
+
+    for label, im_data in visuals.items():
+        for ii, image in enumerate(im_data):
+            short_path = ntpath.basename(image_path[ii])
+            name = os.path.splitext(short_path)[0]
+            image_name = '%s_%s.png' % (name, label)
+            save_path = os.path.join(image_dir, image_name)
+            torchvision.utils.save_image(image, save_path, normalize=True)
 
 
 class Visualizer():

@@ -36,6 +36,9 @@ class TrainOptions(BaseOptions):
         parser.add_argument('--lr_policy', type=str, default='linear', help='learning rate policy. [linear | step | plateau | cosine]')
         parser.add_argument('--lr_decay_iters', type=int, default=50, help='multiply by a gamma every lr_decay_iters iterations')
         parser.add_argument('--labels_file', type=str, default='./datasets/satellite_AB_labels.txt', help='where to find the labels')
+        parser.add_argument('--intermediate_results_dir', type=str, default='./interim_results/', help='saves intermediate results here.')
+        parser.add_argument('--aspect_ratio', type=float, default=1.0, help='aspect ratio of result images')
+        parser.add_argument('--random_seed', type=float, default=344344598794, help='random seed')
 
         self.isTrain = True
         return parser

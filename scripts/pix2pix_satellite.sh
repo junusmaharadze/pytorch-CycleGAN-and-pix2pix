@@ -1,18 +1,19 @@
 set -ex
 python train.py \
---dataroot ./datasets/satellite_AB/AB \
---name satellite_pix2pix_bs8 \
+--dataroot ./datasets/xBD_datasets/xBD_polygons_AB/AB \
+--name DamageGAN_initial \
 --model pix2pix \
 --direction AtoB \
 --input_nc 3 \
 --output_nc 3 \
---batch_size 32 \
---n_epochs 10 \
---epoch_count 4 \
---n_epochs_decay 10 \
+--batch_size 128 \
+--n_epochs 100 \
+--epoch_count 0 \
+--n_epochs_decay 100 \
 --model pix2pix \
---no_flip \
 --netG unet_128 \
 --load_size 142 \
 --crop_size 128 \
---num_threads 1
+--num_threads 12 \
+--labels_file ./datasets/xBD_datasets/xBD_polygons_AB_csv/satellite_AB_labels.txt \
+--intermediate_results_dir ./interim_results/

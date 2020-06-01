@@ -3,7 +3,7 @@ import torch
 from collections import OrderedDict
 from abc import ABC, abstractmethod
 from . import networks
-
+import random
 
 class BaseModel(ABC):
     """This class is an abstract base class (ABC) for models.
@@ -42,6 +42,7 @@ class BaseModel(ABC):
         self.optimizers = []
         self.image_paths = []
         self.metric = 0  # used for learning rate policy 'plateau'
+        self.seed = opt.random_seed
 
     @staticmethod
     def modify_commandline_options(parser, is_train):
@@ -134,6 +135,17 @@ class BaseModel(ABC):
             if isinstance(name, str):
                 visual_ret[name] = getattr(self, name)
         return visual_ret
+
+    def get_current_visuals_sample(self, sample_size=5):
+        """Return visualization images. train.py will display these images with visdom, and save the images to a HTML"""
+        visual_ret = OrderedDict()
+        random.seed(self.seed)
+        num_imgs = len(getattr(self, self.visual_names[0]))
+        selected_imgs = random.sample(list(range(num_imgs)), sample_size)
+        for name in self.visual_names:
+            if isinstance(name, str):
+                visual_ret[name] = getattr(self, name)[selected_imgs]
+        return visual_ret, selected_imgs
 
     def get_current_losses(self):
         """Return traning losses / errors. train.py will print out these errors on console, and save them to a file"""

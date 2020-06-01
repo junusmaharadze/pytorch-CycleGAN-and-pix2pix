@@ -24,6 +24,21 @@ from data import create_dataset
 from models import create_model
 from util.visualizer import Visualizer
 
+from util.visualizer import save_interim_images
+from util import html
+import os
+from pathlib import Path
+
+
+def save_current_images(model, dataset_type):
+    selec_visuals, selected_imgs = model.get_current_visuals_sample()
+    img_path = [model.get_image_paths()[ii] for ii in selected_imgs]     # get image paths
+    labels = [model.get_image_labels()[ii] for ii in selected_imgs]
+    image_dir = os.path.join(opt.intermediate_results_dir, opt.name, str(epoch), dataset_type)
+    Path(image_dir).mkdir(parents=True, exist_ok=True)
+    save_interim_images(image_dir, selec_visuals, img_path, labels, aspect_ratio=1.0, width=256)
+
+
 if __name__ == '__main__':
     opt = TrainOptions().parse()   # get training options
     dataset = create_dataset(opt)  # create a dataset given opt.dataset_mode and other options
@@ -51,6 +66,18 @@ if __name__ == '__main__':
             epoch_iter += opt.batch_size
             model.set_input(data)         # unpack data from dataset and apply preprocessing
             model.optimize_parameters()   # calculate loss functions, get gradients, update network weights
+
+            # Save training images
+            save_current_images(model, 'train')
+            # @Todo: Call classifier predict function with saved 'fake_B' images
+
+            # Save validation set predict images
+            val_dataset = create_dataset(opt, True)  # create a dataset given opt.dataset_mode and other options
+            for i, val_data in enumerate(dataset):  # inner loop within one epoch
+                model.set_input(val_data)  # unpack data from data loader
+                model.test()           # run inference
+                save_current_images(model, 'val')
+                # @Todo: Call classifier predict function with saed 'face_B' images
 
             if total_iters % opt.display_freq == 0:   # display images on visdom and save images to a HTML file
                 save_result = total_iters % opt.update_html_freq == 0
