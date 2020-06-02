@@ -77,7 +77,7 @@ if __name__ == '__main__':
                 model.set_input(val_data)  # unpack data from data loader
                 model.test()           # run inference
                 save_current_images(model, 'val')
-                # @Todo: Call classifier predict function with saed 'face_B' images
+                # @Todo: Call classifier predict function with saved 'face_B' images
 
             if total_iters % opt.display_freq == 0:   # display images on visdom and save images to a HTML file
                 save_result = total_iters % opt.update_html_freq == 0
