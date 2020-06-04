@@ -1,5 +1,6 @@
 import os
 
+from torch.utils.data import Dataset
 from torchvision import transforms
 from PIL import Image
 from collections import defaultdict
@@ -33,63 +34,43 @@ data_transforms = {
 }
 
 
-class XbdDataLoader(object):
-    """Custom data loader class for the xBD dataset. It requires the polygons and the labels file as input
-
-    Attributes:
-        data_dir (string): The path to the xBD_polygons_AB folder that contains subfolders A, B, and AB.
-        Only B is needed here
-        labels_file (string): The path to the labels textfile satellite_AB_labels.txt
-        paths_labels_dict (dict): Dictionary that contains the true label for each image, taken from satellite_AB_labels.txt
-    """
-
-    def __init__(self, data_dir, labels_file):
+class XbdDataset(Dataset):
+    def __init__(self, data_dir, labels_file, data_split):
         self.data_dir = data_dir
         self.labels_file = labels_file
+        self.data_split = data_split
         self.paths_labels_dict = defaultdict(dict)
         self._construct_labels_dict()
+
+    def __len__(self):
+        return len(self.filenames)
+
+    def __getitem__(self, index):
+        # Generates one sample of the data
+        images_dir = os.path.join(self.data_dir, 'B', self.data_split)
+        image_path = os.path.join(images_dir, self.filenames[index])
+
+        image = Image.open(image_path)
+        transformed_image = data_transforms[self.data_split](image)
+        label = self.labels[index]
+
+        return transformed_image, label
 
     def _construct_labels_dict(self):
         with open(self.labels_file, 'r') as f:
             lines = [line.replace('\n', '') for line in f.readlines()]
+            filenames = []
+            labels = []
+
             for line in lines:
                 path, label = line.split(' ')
                 split_path = path.split('/')
                 filename = split_path[-1]
-                split_name = split_path[-2]
 
-                if split_name in ['train', 'val', 'test']:
-                    self.paths_labels_dict[split_name][filename] = int(label)
-
-    def _get_images_and_labels(self, split_name):
-        train_dir = os.path.join(self.data_dir, 'B', split_name)
-        print('{} dir: {}'.format(split_name, train_dir))
-        images = []
-        labels = []
-
-        for filename in os.listdir(train_dir):
-            image_path = os.path.join(train_dir, filename)
-            image = Image.open(image_path)
-            transformed_image = data_transforms[split_name](image)
-            images.append(transformed_image)
-
-            # Get class label from labels_file corresponding to each image
-            label = self.paths_labels_dict[split_name][filename]
-            labels.append(label)
-
-        return images, labels
-
-    @property
-    def train_data(self):
-        images, labels = self._get_images_and_labels('train')
-        return list(zip(images, labels))
-
-    @property
-    def val_data(self):
-        images, labels = self._get_images_and_labels('val')
-        return list(zip(images, labels))
-
-    @property
-    def test_data(self):
-        images, labels = self._get_images_and_labels('test')
-        return list(zip(images, labels))
+                if self.data_split in path:
+                    self.paths_labels_dict[filename] = int(label)
+                    filenames.append(filename)
+                    labels.append(int(label))
+        self.filenames = filenames
+        self.labels = labels
+        print('{} dir size: {}'.format(self.data_split, len(self.filenames)))

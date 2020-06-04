@@ -12,7 +12,7 @@ from torchvision import models
 from torch.utils.data import DataLoader
 from tqdm import tqdm
 
-from xBD_data_loader import XbdDataLoader
+from xBD_data_loader import XbdDataset
 
 
 def train_val_model(model, dataloaders, criterion, optimizer, num_epochs):
@@ -141,8 +141,8 @@ if __name__ == '__main__':
     parser.add_argument('--num_workers', dest='num_workers', type=int, default=0)
     args = parser.parse_args()
 
-    # for arg in vars(args):
-    #     print('[%s] = ' % arg, getattr(args, arg))
+    for arg in vars(args):
+        print('[%s] =' % arg, getattr(args, arg))
 
     device = torch.device('cuda' if torch.cuda.is_available() else 'cpu')
     print('Device:', device)
@@ -154,13 +154,12 @@ if __name__ == '__main__':
     print('Creating model {}'.format(args.model))
     model.to(device)  # Transfer the model to the GPU/CPU
 
-    # Load the data
-    data_loader = XbdDataLoader(data_dir=args.data_dir, labels_file=args.labels_file)
+    # Load train and val data
+    train_dataset = XbdDataset(args.data_dir, args.labels_file, 'train')
+    train_loader = DataLoader(train_dataset, batch_size=args.batch_size, num_workers=args.num_workers, shuffle=True)
 
-    train_data = data_loader.train_data
-    train_loader = DataLoader(train_data, batch_size=args.batch_size, num_workers=args.num_workers, shuffle=True)
-    val_data = data_loader.val_data
-    val_loader = DataLoader(val_data, batch_size=args.batch_size, num_workers=args.num_workers, shuffle=True)
+    val_dataset = XbdDataset(args.data_dir, args.labels_file, 'val')
+    val_loader = DataLoader(val_dataset, batch_size=args.batch_size, num_workers=args.num_workers, shuffle=False)
 
     dataloaders_dict = dict()
     dataloaders_dict['train'] = train_loader
