@@ -1,21 +1,18 @@
 import torch
-import torch.nn as nn
-import torch.optim as optim
-import argparse
 import os
 import time
 import copy
 import matplotlib.pyplot as plt
 import numpy as np
 
-from torchvision import models
 from torch.utils.data import DataLoader
 from tqdm import tqdm
 
 from xBD_data_loader import XbdDataset
+from utils import parse_arguments, initialize_model_and_params
 
 
-def train_val_model(model, dataloaders, criterion, optimizer, num_epochs):
+def train_val_model(model, dataloaders, criterion, optimizer, num_epochs, device):
     since = time.time()
 
     best_model_wts = copy.deepcopy(model.state_dict())
@@ -126,32 +123,8 @@ def save_checkpoint(model, checkpoint):
 
 
 if __name__ == '__main__':
-    parser = argparse.ArgumentParser('Train classifier')
-    parser.add_argument('--model', dest='model', type=str, default='resnet18',
-                        help='One of the models: resnet18|vgg4|densenet')
-    parser.add_argument('--data_dir', dest='data_dir', type=str,
-                        help='Path to the dataset containing the polygons and the labels textfile, eg: ./datasets/xBD_datasets/xBD_polygons_AB')
-    parser.add_argument('--labels_file', dest='labels_file', type=str,
-                        help='Path to the labels txt, eg: ./datasets/xBD_datasets/xBD_polygons_AB_csv/satellite_AB_labels.txt')
-    parser.add_argument('--num_epochs', dest='num_epochs', type=int, default=100,
-                        help='Number of epochs')
-    parser.add_argument('--batch_size', dest='batch_size', type=int, default=16)
-    parser.add_argument('--checkpoint_name', dest='checkpoint_name', type=str, default='resnet18_checkpoint',
-                        help='The name of the best model\'s checkpoint to be used for inference')
-    parser.add_argument('--num_workers', dest='num_workers', type=int, default=0)
-    args = parser.parse_args()
-
-    for arg in vars(args):
-        print('[%s] =' % arg, getattr(args, arg))
-
-    device = torch.device('cuda' if torch.cuda.is_available() else 'cpu')
-    print('Device:', device)
-
-    if args.model == 'resnet18':
-        model = models.resnet18(pretrained=False, progress=True)
-    # Add more models here
-
-    print('Creating model {}'.format(args.model))
+    args = parse_arguments()
+    model, device, loss_function, optimizer = initialize_model_and_params(args.model)
     model.to(device)  # Transfer the model to the GPU/CPU
 
     # Load train and val data
@@ -165,12 +138,10 @@ if __name__ == '__main__':
     dataloaders_dict['train'] = train_loader
     dataloaders_dict['val'] = val_loader
 
-    # loss_function = nn.CrossEntropyLoss().cuda()
-    loss_function = nn.CrossEntropyLoss().to(device)
-    optimizer = optim.Adam(model.parameters())  # Optimize all parameters
-
     # Train and eval the model
-    best_val_model, train_stats, val_stats = train_val_model(model, dataloaders_dict, loss_function, optimizer, args.num_epochs)
+    best_val_model, train_stats, val_stats = train_val_model(model, dataloaders_dict, loss_function,
+                                                             optimizer, args.num_epochs, device)
+
     # Plots functionality is not yet completed
     plot_curves(args.num_epochs, train_stats, val_stats)
 
