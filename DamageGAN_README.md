@@ -59,4 +59,25 @@ For more information on how and why the data should be in this format, read `./d
 
 Now use the generated folder `AB` and the labels textfile `satellite_AB_labels.txt` as an input to the GAN.
 
+
+## Evaluate GAN performance with the resnet18 classifier
+After creating the data folders `xBD_polygons_AB` and `xBD_polygons_AB_csv`, we train resnet18 on all B images
+(train, val) and test on the ones generated from the GAN.
+
+The files for training and testing are in the `./classifiers` folder and we call them through the bash script
+`./scripts/run_classifier.sh`. The files `./classifiers/train.py` and `./classifiers/test.py` are abstract enough
+to work with any future classifier.
+
+Call run_classifier.sh with the argument **train** for training & validation, which then stores the checkpoint for the best
+validation model. Then call it with **test** to load the stored checkpoint and test on the newly generated images.
+
+```bash
+bash scripts/run_classifier.sh train
+bash scripts/run_classifier.sh test
+
+```
+
+This should run without any other calls or modifications, given that the data folder structure is the same as mentioned
+in the previous section. However, you can modify `scripts/run_classifier.sh` to change the parameters.
+
 @TODO: Write detailed steps on how to train the GAN etc.
