@@ -28,6 +28,7 @@ from util.visualizer import save_interim_images
 from util import html
 import os
 from pathlib import Path
+import classifiers.test as classifier_test
 
 
 def save_current_images(model, dataset_type):
@@ -69,6 +70,7 @@ if __name__ == '__main__':
 
             # Save training images
             save_current_images(model, 'train')
+            # classifier_test.main()
             # @Todo: Call classifier predict function with saved 'fake_B' images
 
             # Save validation set predict images

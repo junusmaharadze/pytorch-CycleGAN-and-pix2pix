@@ -63,11 +63,12 @@ def save_interim_images(image_dir, visuals, image_path, labels=[], aspect_ratio=
 
     for label, im_data in visuals.items():
         for ii, image in enumerate(im_data):
-            short_path = ntpath.basename(image_path[ii])
-            name = os.path.splitext(short_path)[0]
-            image_name = '%s_%s.png' % (name, label)
-            save_path = os.path.join(image_dir, image_name)
-            torchvision.utils.save_image(image, save_path, normalize=True)
+            if label == 'fake_B':
+                short_path = ntpath.basename(image_path[ii])
+                name = os.path.splitext(short_path)[0]
+                image_name = '%s_%s.png' % (name, label)
+                save_path = os.path.join(image_dir, image_name)
+                torchvision.utils.save_image(image, save_path, normalize=True)
 
 
 class Visualizer():
