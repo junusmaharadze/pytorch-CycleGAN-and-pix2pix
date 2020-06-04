@@ -26,7 +26,6 @@ def test_model(model, data_loader, loss_function, device):
     current_loss = 0.0
     current_acc = 0
 
-    print('data_loader', data_loader)
     # iterate over  the validation data
     for inputs, labels in tqdm(data_loader):
         # send input/labels to the GPU/CPU
