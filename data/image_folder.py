@@ -29,7 +29,10 @@ def make_dataset(dir, batch_size, max_dataset_size=float("inf"), val_eval=False,
     if (val_eval is True) and (val_eval_number < batch_size):
         for root, _, fnames in sorted(os.walk(dir)):
             print(len(fnames))
-            sample_fnames = sample(fnames, val_eval_number)
+            try:
+                fnames = sample(fnames, val_eval_number)
+            except:
+                print('val_eval_number higher than number of val images')
             for fname in fnames:
                 if is_image_file(fname):
                     path = os.path.join(root, fname)
