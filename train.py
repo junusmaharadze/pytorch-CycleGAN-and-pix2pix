@@ -92,15 +92,20 @@ if __name__ == '__main__':
             model.save_networks('latest')
             model.save_networks(epoch)
 
+        model.update_learning_rate()                     # update learning rates at the end of every epoch.
+
         # Save training images and call classifier
+        print('saving training images')
         save_paths, labels = save_current_images(model, 'train')
         image_dir = os.path.join(opt.intermediate_results_dir, opt.name, str(epoch), 'train')
+        print('running train set classifier test')
         classifier_test.main(model='resnet18', data_dir=image_dir, labels_file=opt.labels_file, pix2pix_interim=True,
                              current_img_paths=save_paths, current_labels=labels, data_split_type='train',
                              batch_size=opt.batch_size, num_workers=8, checkpoint_name='resnet18_checkpoint')
 
         # Save validation set predict images and call classifier
-        val_dataset = create_dataset(opt, val_eval=True, val_eval_number=5)  # create a dataset given opt.dataset_mode and other options
+        print('saving val set images')
+        val_dataset = create_dataset(opt, val_eval=True, val_eval_number=opt.val_eval_number)  # create a dataset given opt.dataset_mode and other options
         all_save_paths = []
         all_labels = []
         for i, val_data in enumerate(dataset):  # inner loop within one epoch
@@ -109,11 +114,11 @@ if __name__ == '__main__':
             save_paths, labels = save_current_images(model, 'val')
             all_save_paths.extend(save_paths)
             all_labels.extend(labels)
-        print('lenght', len(all_save_paths), len(all_labels))
+        print('val images evaluated:', len(all_save_paths))
         image_dir = os.path.join(opt.intermediate_results_dir, opt.name, str(epoch), 'train')
+        print('running val set classifier test')
         classifier_test.main(model='resnet18', data_dir=image_dir, labels_file=opt.labels_file, pix2pix_interim=True,
                              current_img_paths=all_save_paths, current_labels=all_labels, data_split_type='val',
                              batch_size=opt.batch_size, num_workers=8, checkpoint_name='resnet18_checkpoint')
 
         print('End of epoch %d / %d \t Time Taken: %d sec' % (epoch, opt.n_epochs + opt.n_epochs_decay, time.time() - epoch_start_time))
-        model.update_learning_rate()                     # update learning rates at the end of every epoch.
