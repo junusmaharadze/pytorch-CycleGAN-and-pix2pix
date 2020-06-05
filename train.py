@@ -111,15 +111,11 @@ if __name__ == '__main__':
         val_dataset = create_dataset(opt, val_eval=True) # val_eval_number=opt.val_eval_number)  # create a dataset given opt.dataset_mode and other options
         all_save_paths = []
         all_labels = []
-        batches_to_evaluate = 2
         for i, val_data in enumerate(val_dataset):  # inner loop within one epoch
-            if i <= batches_to_evaluate:
-                print('i', i)
-                print('len val data', len(val_data))
+            if i <= opt.batches_to_evaluate:
                 model.set_input(val_data)  # unpack data from data loader
                 model.test()           # run inference
                 save_paths, labels = save_current_images(model, 'val')
-                print('len save paths', len(save_paths))
                 all_save_paths.extend(save_paths)
                 all_labels.extend(labels)
         print('val images evaluated:', len(all_save_paths))
