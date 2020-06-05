@@ -41,10 +41,10 @@ class XbdDataset(Dataset):
         self.labels_file = labels_file
         self.data_split = data_split
         self.paths_labels_dict = defaultdict(dict)
+        self.pix2pix_interim = pix2pix_interim
         if pix2pix_interim is False:
             self._construct_labels_dict()
         else:
-            self.pix2pix_interim = pix2pix_interim
             self.filenames = current_img_paths
             self.labels = [int(x) for x in current_labels]
 

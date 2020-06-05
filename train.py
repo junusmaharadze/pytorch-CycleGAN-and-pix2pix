@@ -27,8 +27,8 @@ from util.visualizer import Visualizer
 from util.visualizer import save_interim_images
 import os
 from pathlib import Path
-import classifiers.test as classifier_test
-from tqdm import tqdm
+import classifiers.test_gan_eval as classifier_test
+
 
 def save_current_images(model, dataset_type):
     selec_visuals = model.get_current_visuals()
@@ -63,7 +63,6 @@ if __name__ == '__main__':
         visualizer.reset()              # reset the visualizer: make sure it saves the results to HTML at least once every epoch
         print('epoch', epoch)
         for i, data in enumerate(dataset):  # inner loop within one epoch
-            print('iteration', total_iters, 'of ', len(dataset))
             iter_start_time = time.time()  # timer for computation per iteration
             if total_iters % opt.print_freq == 0:
                 t_data = iter_start_time - iter_data_time
@@ -104,7 +103,7 @@ if __name__ == '__main__':
         save_paths, labels = save_current_images(model, 'train')
         image_dir = os.path.join(opt.intermediate_results_dir, opt.name, str(epoch), 'train')
         print('running train set classifier test')
-        classifier_test.main(model='resnet18', data_dir=image_dir, labels_file=opt.labels_file, pix2pix_interim=True,
+        classifier_test.main_gan(model='resnet18', data_dir=image_dir, labels_file=opt.labels_file, pix2pix_interim=True,
                              current_img_paths=save_paths, current_labels=labels, data_split_type='train',
                              batch_size=opt.batch_size, num_workers=8, checkpoint_name='resnet18_checkpoint',
                              epoch=epoch)
@@ -125,7 +124,7 @@ if __name__ == '__main__':
         print('val images evaluated:', len(all_save_paths))
         image_dir = os.path.join(opt.intermediate_results_dir, opt.name, str(epoch), 'train')
         print('running val set classifier test')
-        classifier_test.main(model='resnet18', data_dir=image_dir, labels_file=opt.labels_file, pix2pix_interim=True,
+        classifier_test.main_gan(model='resnet18', data_dir=image_dir, labels_file=opt.labels_file, pix2pix_interim=True,
                              current_img_paths=all_save_paths, current_labels=all_labels, data_split_type='val',
                              batch_size=opt.batch_size, num_workers=8, checkpoint_name='resnet18_checkpoint',
                              epoch=epoch)
