@@ -69,24 +69,6 @@ if __name__ == '__main__':
             model.set_input(data)         # unpack data from dataset and apply preprocessing
             model.optimize_parameters()   # calculate loss functions, get gradients, update network weights
 
-            # Save training images
-            save_paths, labels = save_current_images(model, 'train')
-            image_dir = os.path.join(opt.intermediate_results_dir, opt.name, str(epoch), 'train')
-            classifier_test.main(model='resnet18', data_dir=image_dir, labels_file=opt.labels_file, pix2pix_interim=True,
-                                 current_img_paths=save_paths, current_labels=labels, data_split_type='train',
-                                 batch_size=opt.batch_size, num_workers=8, checkpoint_name='resnet18_checkpoint')
-
-            # Save validation set predict images
-            val_dataset = create_dataset(opt, val_eval=True, val_eval_number=5)  # create a dataset given opt.dataset_mode and other options
-            for i, val_data in enumerate(dataset):  # inner loop within one epoch
-                model.set_input(val_data)  # unpack data from data loader
-                model.test()           # run inference
-                save_paths, labels = save_current_images(model, 'val')
-                image_dir = os.path.join(opt.intermediate_results_dir, opt.name, str(epoch), 'train')
-                classifier_test.main(model='resnet18', data_dir=image_dir, labels_file=opt.labels_file, pix2pix_interim=True,
-                                     current_img_paths=save_paths, current_labels=labels, data_split_type='val',
-                                     batch_size=opt.batch_size, num_workers=8, checkpoint_name='resnet18_checkpoint')
-
             if total_iters % opt.display_freq == 0:   # display images on visdom and save images to a HTML file
                 save_result = total_iters % opt.update_html_freq == 0
                 model.compute_visuals()
@@ -109,6 +91,29 @@ if __name__ == '__main__':
             print('saving the model at the end of epoch %d, iters %d' % (epoch, total_iters))
             model.save_networks('latest')
             model.save_networks(epoch)
+
+        # Save training images and call classifier
+        save_paths, labels = save_current_images(model, 'train')
+        image_dir = os.path.join(opt.intermediate_results_dir, opt.name, str(epoch), 'train')
+        classifier_test.main(model='resnet18', data_dir=image_dir, labels_file=opt.labels_file, pix2pix_interim=True,
+                             current_img_paths=save_paths, current_labels=labels, data_split_type='train',
+                             batch_size=opt.batch_size, num_workers=8, checkpoint_name='resnet18_checkpoint')
+
+        # Save validation set predict images and call classifier
+        val_dataset = create_dataset(opt, val_eval=True, val_eval_number=5)  # create a dataset given opt.dataset_mode and other options
+        all_save_paths = []
+        all_labels = []
+        for i, val_data in enumerate(dataset):  # inner loop within one epoch
+            model.set_input(val_data)  # unpack data from data loader
+            model.test()           # run inference
+            save_paths, labels = save_current_images(model, 'val')
+            all_save_paths.extend(save_paths)
+            all_labels.extend(labels)
+        print('lenght', len(all_save_paths), len(all_labels))
+        image_dir = os.path.join(opt.intermediate_results_dir, opt.name, str(epoch), 'train')
+        classifier_test.main(model='resnet18', data_dir=image_dir, labels_file=opt.labels_file, pix2pix_interim=True,
+                             current_img_paths=all_save_paths, current_labels=all_labels, data_split_type='val',
+                             batch_size=opt.batch_size, num_workers=8, checkpoint_name='resnet18_checkpoint')
 
         print('End of epoch %d / %d \t Time Taken: %d sec' % (epoch, opt.n_epochs + opt.n_epochs_decay, time.time() - epoch_start_time))
         model.update_learning_rate()                     # update learning rates at the end of every epoch.
