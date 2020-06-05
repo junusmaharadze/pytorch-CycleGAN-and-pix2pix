@@ -22,7 +22,7 @@ def is_image_file(filename):
     return any(filename.endswith(extension) for extension in IMG_EXTENSIONS)
 
 
-def make_dataset(dir, max_dataset_size=float("inf"), batch_size, val_eval=False, val_eval_number=100):
+def make_dataset(dir, batch_size, max_dataset_size=float("inf"), val_eval=False, val_eval_number=100):
     images = []
     assert os.path.isdir(dir), '%s is not a valid directory' % dir
 
