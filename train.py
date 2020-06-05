@@ -28,7 +28,7 @@ from util.visualizer import save_interim_images
 import os
 from pathlib import Path
 import classifiers.test as classifier_test
-
+from tqdm import tqdm
 
 def save_current_images(model, dataset_type):
     selec_visuals = model.get_current_visuals()
@@ -62,7 +62,7 @@ if __name__ == '__main__':
         epoch_iter = 0                  # the number of training iterations in current epoch, reset to 0 every epoch
         visualizer.reset()              # reset the visualizer: make sure it saves the results to HTML at least once every epoch
         print('epoch', epoch)
-        for i, data in enumerate(dataset):  # inner loop within one epoch
+        for i, data in tqdm(enumerate(dataset)):  # inner loop within one epoch
             iter_start_time = time.time()  # timer for computation per iteration
             if total_iters % opt.print_freq == 0:
                 t_data = iter_start_time - iter_data_time
@@ -112,7 +112,7 @@ if __name__ == '__main__':
         all_save_paths = []
         all_labels = []
         for i, val_data in enumerate(val_dataset):  # inner loop within one epoch
-            if i <= opt.batches_to_evaluate:
+            if i < opt.batches_to_evaluate:
                 model.set_input(val_data)  # unpack data from data loader
                 model.test()           # run inference
                 save_paths, labels = save_current_images(model, 'val')

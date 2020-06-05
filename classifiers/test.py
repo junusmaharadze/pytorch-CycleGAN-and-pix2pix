@@ -79,10 +79,10 @@ def main(**kwargs):
             os.mkdir(gan_eval_results_dir)
         labels_file = Path(os.path.join(gan_eval_results_dir, 'gan_eval.csv'))
         if not labels_file.is_file():
-            with open('gan_eval.csv', 'w') as file:
+            with open(labels_file, 'w') as file:
                 pass
         with open(labels_file, 'a') as file:
-            file.write(str(kwargs['data_split_type']) + ',' + str(kwargs['epoch']) + ',' + str(test_accuracy) + ',' + str(test_loss))
+            file.write(str(kwargs['data_split_type']) + ',' + str(kwargs['epoch']) + ',' + str(float(test_accuracy)) + ',' + str(float(test_loss)) + '\n')
 
 
 if __name__ == '__main__':
