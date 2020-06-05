@@ -9,6 +9,7 @@ import torch.utils.data as data
 from PIL import Image
 import os
 import os.path
+from random import sample
 
 IMG_EXTENSIONS = [
     '.jpg', '.JPG', '.jpeg', '.JPEG',
@@ -21,15 +22,22 @@ def is_image_file(filename):
     return any(filename.endswith(extension) for extension in IMG_EXTENSIONS)
 
 
-def make_dataset(dir, max_dataset_size=float("inf")):
+def make_dataset(dir, max_dataset_size=float("inf"), val_eval=False, val_eval_number=100):
     images = []
     assert os.path.isdir(dir), '%s is not a valid directory' % dir
 
-    for root, _, fnames in sorted(os.walk(dir)):
-        for fname in fnames:
-            if is_image_file(fname):
-                path = os.path.join(root, fname)
-                images.append(path)
+    if val_eval is False:
+        for root, _, fnames in sorted(os.walk(dir)):
+            for fname in fnames:
+                if is_image_file(fname):
+                    path = os.path.join(root, fname)
+                    images.append(path)
+    else:
+        for root, _, fnames in sample(sorted(os.walk(dir), val_eval_number)):
+            for fname in fnames:
+                if is_image_file(fname):
+                    path = os.path.join(root, fname)
+                    images.append(path)
     return images[:min(max_dataset_size, len(images))]
 
 

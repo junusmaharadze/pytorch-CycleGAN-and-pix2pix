@@ -44,7 +44,7 @@ def get_option_setter(dataset_name):
     return dataset_class.modify_commandline_options
 
 
-def create_dataset(opt, val_eval=False):
+def create_dataset(opt, val_eval=False, val_eval_number=100):
     """Create a dataset given the option.
 
     This function wraps the class CustomDatasetDataLoader.
@@ -54,7 +54,7 @@ def create_dataset(opt, val_eval=False):
         >>> from data import create_dataset
         >>> dataset = create_dataset(opt)
     """
-    data_loader = CustomDatasetDataLoader(opt, val_eval)
+    data_loader = CustomDatasetDataLoader(opt, val_eval, val_eval_number)
     dataset = data_loader.load_data()
     return dataset
 
@@ -62,7 +62,7 @@ def create_dataset(opt, val_eval=False):
 class CustomDatasetDataLoader():
     """Wrapper class of Dataset class that performs multi-threaded data loading"""
 
-    def __init__(self, opt, val_eval=False):
+    def __init__(self, opt, val_eval=False, val_eval_number=100):
         """Initialize this class
 
         Step 1: create a dataset instance given the name [dataset_mode]

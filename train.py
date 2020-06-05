@@ -71,7 +71,6 @@ if __name__ == '__main__':
 
             # Save training images
             save_paths, labels = save_current_images(model, 'train')
-            print(save_paths, labels)
             image_dir = os.path.join(opt.intermediate_results_dir, opt.name, str(epoch), 'train')
             classifier_test.main(model='resnet18', data_dir=image_dir, labels_file=opt.labels_file, pix2pix_interim=True,
                                  current_img_paths=save_paths, current_labels=labels, data_split_type='train',
@@ -80,7 +79,7 @@ if __name__ == '__main__':
             # @Todo: Call classifier predict function with saved 'fake_B' images
 
             # Save validation set predict images
-            val_dataset = create_dataset(opt, True)  # create a dataset given opt.dataset_mode and other options
+            val_dataset = create_dataset(opt, val_eval=True, val_eval_number=100)  # create a dataset given opt.dataset_mode and other options
             for i, val_data in enumerate(dataset):  # inner loop within one epoch
                 model.set_input(val_data)  # unpack data from data loader
                 model.test()           # run inference
