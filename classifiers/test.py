@@ -7,6 +7,7 @@ from tqdm import tqdm
 
 from classifiers.xBD_data_loader import XbdDataset
 from classifiers.utils import parse_arguments, initialize_model_and_params
+from pathlib import Path
 
 
 def test_model(model, data_loader, loss_function, device, data_split_type='test'):
@@ -72,6 +73,16 @@ def main(**kwargs):
 
     # Test model on unseen images
     test_accuracy, test_loss = test_model(model, test_loader, loss_function, device, kwargs['data_split_type'])
+    if 'pix2pix_interim' in kwargs:
+        gan_eval_results_dir = './gan_eval'
+        if not os.path.isdir(gan_eval_results_dir):
+            os.mkdir(gan_eval_results_dir)
+        labels_file = Path(os.path.join(gan_eval_results_dir, 'gan_eval.csv'))
+        if not labels_file.is_file():
+            with open('gan_eval.csv', 'w') as file:
+                pass
+        with open(labels_file, 'a') as file:
+            file.write(str(kwargs['data_split_type']) + ',' + str(kwargs['epoch']) + ',' + str(test_accuracy) + ',' + str(test_loss))
 
 
 if __name__ == '__main__':

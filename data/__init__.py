@@ -54,7 +54,7 @@ def create_dataset(opt, val_eval=False, val_eval_number=100):
         >>> from data import create_dataset
         >>> dataset = create_dataset(opt)
     """
-    data_loader = CustomDatasetDataLoader(opt, val_eval, val_eval_number)
+    data_loader = CustomDatasetDataLoader(opt, val_eval=val_eval, val_eval_number=val_eval_number)
     dataset = data_loader.load_data()
     return dataset
 

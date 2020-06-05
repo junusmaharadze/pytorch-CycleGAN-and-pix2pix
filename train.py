@@ -25,7 +25,6 @@ from models import create_model
 from util.visualizer import Visualizer
 
 from util.visualizer import save_interim_images
-from util import html
 import os
 from pathlib import Path
 import classifiers.test as classifier_test
@@ -101,7 +100,8 @@ if __name__ == '__main__':
         print('running train set classifier test')
         classifier_test.main(model='resnet18', data_dir=image_dir, labels_file=opt.labels_file, pix2pix_interim=True,
                              current_img_paths=save_paths, current_labels=labels, data_split_type='train',
-                             batch_size=opt.batch_size, num_workers=8, checkpoint_name='resnet18_checkpoint')
+                             batch_size=opt.batch_size, num_workers=8, checkpoint_name='resnet18_checkpoint',
+                             epoch=epoch)
 
         # Save validation set predict images and call classifier
         print('saving val set images')
@@ -119,6 +119,7 @@ if __name__ == '__main__':
         print('running val set classifier test')
         classifier_test.main(model='resnet18', data_dir=image_dir, labels_file=opt.labels_file, pix2pix_interim=True,
                              current_img_paths=all_save_paths, current_labels=all_labels, data_split_type='val',
-                             batch_size=opt.batch_size, num_workers=8, checkpoint_name='resnet18_checkpoint')
+                             batch_size=opt.batch_size, num_workers=8, checkpoint_name='resnet18_checkpoint',
+                             epoch=epoch)
 
         print('End of epoch %d / %d \t Time Taken: %d sec' % (epoch, opt.n_epochs + opt.n_epochs_decay, time.time() - epoch_start_time))

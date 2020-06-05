@@ -23,7 +23,7 @@ class AlignedDataset(BaseDataset):
         else:
             self.dir_AB = os.path.join(opt.dataroot, 'val')  # get the image directory
 
-        self.AB_paths = sorted(make_dataset(self.dir_AB, opt.batch_size, opt.max_dataset_size, val_eval, val_eval_number))  # get image paths
+        self.AB_paths = sorted(make_dataset(self.dir_AB, opt.batch_size, opt.max_dataset_size, val_eval=val_eval, val_eval_number=val_eval_number))  # get image paths
         self.true_labels = {}
 
         # Save true labels for each image pair
