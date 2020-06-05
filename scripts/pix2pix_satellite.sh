@@ -14,7 +14,7 @@ python train.py \
 --netG unet_128 \
 --load_size 142 \
 --crop_size 128 \
---num_threads 12 \
+--num_threads 1 \
 --labels_file ./datasets/xBD_datasets/xBD_polygons_AB_csv/satellite_AB_labels.txt \
 --intermediate_results_dir ./interim_results/ \
 --save_epoch_freq 1

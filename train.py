@@ -76,10 +76,8 @@ if __name__ == '__main__':
                                  current_img_paths=save_paths, current_labels=labels, data_split_type='train',
                                  batch_size=opt.batch_size, num_workers=8, checkpoint_name='resnet18_checkpoint')
 
-            # @Todo: Call classifier predict function with saved 'fake_B' images
-
             # Save validation set predict images
-            val_dataset = create_dataset(opt, val_eval=True, val_eval_number=100)  # create a dataset given opt.dataset_mode and other options
+            val_dataset = create_dataset(opt, val_eval=True, val_eval_number=5)  # create a dataset given opt.dataset_mode and other options
             for i, val_data in enumerate(dataset):  # inner loop within one epoch
                 model.set_input(val_data)  # unpack data from data loader
                 model.test()           # run inference
@@ -88,8 +86,6 @@ if __name__ == '__main__':
                 classifier_test.main(model='resnet18', data_dir=image_dir, labels_file=opt.labels_file, pix2pix_interim=True,
                                      current_img_paths=save_paths, current_labels=labels, data_split_type='val',
                                      batch_size=opt.batch_size, num_workers=8, checkpoint_name='resnet18_checkpoint')
-
-                # @Todo: Call classifier predict function with saved 'face_B' images
 
             if total_iters % opt.display_freq == 0:   # display images on visdom and save images to a HTML file
                 save_result = total_iters % opt.update_html_freq == 0

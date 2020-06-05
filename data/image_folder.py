@@ -38,6 +38,7 @@ def make_dataset(dir, batch_size, max_dataset_size=float("inf"), val_eval=False,
                 if is_image_file(fname):
                     path = os.path.join(root, fname)
                     images.append(path)
+    print('val eval: ', val_eval, 'len images', len(images))
     return images[:min(max_dataset_size, len(images))]
 
 
