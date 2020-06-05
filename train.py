@@ -126,7 +126,6 @@ if __name__ == '__main__':
             else:
                 break
         print('val images evaluated:', len(all_save_paths))
-        print('all save paths', all_save_paths)
         image_dir = os.path.join(opt.intermediate_results_dir, opt.name, str(epoch), 'train')
         print('running val set classifier test')
         classifier_test.main(model='resnet18', data_dir=image_dir, labels_file=opt.labels_file, pix2pix_interim=True,
