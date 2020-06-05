@@ -123,6 +123,8 @@ if __name__ == '__main__':
                 save_paths, labels = save_current_images(model, 'val')
                 all_save_paths.extend(save_paths)
                 all_labels.extend(labels)
+            else:
+                break
         print('val images evaluated:', len(all_save_paths))
         print('all save paths', all_save_paths)
         image_dir = os.path.join(opt.intermediate_results_dir, opt.name, str(epoch), 'train')
