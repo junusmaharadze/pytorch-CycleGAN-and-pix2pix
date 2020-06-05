@@ -46,6 +46,7 @@ def save_current_images(model, dataset_type):
 if __name__ == '__main__':
     opt = TrainOptions().parse()   # get training options
     dataset = create_dataset(opt)  # create a dataset given opt.dataset_mode and other options
+    val_dataset = create_dataset(opt, val_eval=True) # val_eval_number=opt.val_eval_number)  # create a dataset given opt.dataset_mode and other options
     print('\n DATASET', dataset)
     dataset_size = len(dataset)    # get the number of images in the dataset.
     print('The number of training images = %d' % dataset_size)
@@ -108,7 +109,6 @@ if __name__ == '__main__':
 
         # Save validation set predict images and call classifier
         print('saving val set images')
-        val_dataset = create_dataset(opt, val_eval=True) # val_eval_number=opt.val_eval_number)  # create a dataset given opt.dataset_mode and other options
         all_save_paths = []
         all_labels = []
         for i, val_data in enumerate(val_dataset):  # inner loop within one epoch
