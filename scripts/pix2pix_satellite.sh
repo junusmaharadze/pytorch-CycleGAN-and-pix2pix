@@ -18,4 +18,4 @@ python train.py \
 --labels_file ./datasets/xBD_datasets/xBD_polygons_AB_csv/satellite_AB_labels.txt \
 --intermediate_results_dir ./interim_results/ \
 --save_epoch_freq 1 \
---val_eval_number 5
+--val_eval_number 3

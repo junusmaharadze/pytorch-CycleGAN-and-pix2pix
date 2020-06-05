@@ -27,7 +27,9 @@ def make_dataset(dir, batch_size, max_dataset_size=float("inf"), val_eval=False,
     assert os.path.isdir(dir), '%s is not a valid directory' % dir
 
     if (val_eval is True) and (val_eval_number < batch_size):
-        for root, _, fnames in sample(sorted(os.walk(dir), val_eval_number)):
+        for root, _, fnames in sorted(os.walk(dir)):
+            print(len(fnames))
+            sample_fnames = sample(fnames, val_eval_number)
             for fname in fnames:
                 if is_image_file(fname):
                     path = os.path.join(root, fname)
