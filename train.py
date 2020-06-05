@@ -119,7 +119,7 @@ if __name__ == '__main__':
                 model.set_input(val_data)  # unpack data from data loader
                 print('test')
                 model.test()           # run inference
-                print('save current images'
+                print('save current images')
                 save_paths, labels = save_current_images(model, 'val')
                 all_save_paths.extend(save_paths)
                 all_labels.extend(labels)
