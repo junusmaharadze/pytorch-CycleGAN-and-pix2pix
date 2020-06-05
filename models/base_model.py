@@ -136,12 +136,12 @@ class BaseModel(ABC):
                 visual_ret[name] = getattr(self, name)
         return visual_ret
 
-    def get_current_visuals_sample(self, sample_size=5):
+    def get_current_visuals_sample(self):
         """Return visualization images. train.py will display these images with visdom, and save the images to a HTML"""
         visual_ret = OrderedDict()
         random.seed(self.seed)
         num_imgs = len(getattr(self, self.visual_names[0]))
-        selected_imgs = random.sample(list(range(num_imgs)), sample_size)
+        selected_imgs = list(range(num_imgs))
         for name in self.visual_names:
             if isinstance(name, str):
                 visual_ret[name] = getattr(self, name)[selected_imgs]

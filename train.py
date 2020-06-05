@@ -31,9 +31,12 @@ import classifiers.test as classifier_test
 
 
 def save_current_images(model, dataset_type):
-    selec_visuals, selected_imgs = model.get_current_visuals_sample()
-    img_path = [model.get_image_paths()[ii] for ii in selected_imgs]     # get image paths
-    labels = [model.get_image_labels()[ii] for ii in selected_imgs]
+    selec_visuals = model.get_current_visuals()
+    img_path = model.get_image_paths()     # get image paths
+    labels = model.get_image_labels()
+    # selec_visuals, selected_imgs = model.get_current_visuals_sample()
+    # img_path = [model.get_image_paths()[ii] for ii in selected_imgs]     # get image paths
+    # labels = [model.get_image_labels()[ii] for ii in selected_imgs]
     image_dir = os.path.join(opt.intermediate_results_dir, opt.name, str(epoch), dataset_type)
     Path(image_dir).mkdir(parents=True, exist_ok=True)
     save_paths = save_interim_images(image_dir, selec_visuals, img_path, labels, aspect_ratio=1.0, width=256)
@@ -105,19 +108,22 @@ if __name__ == '__main__':
 
         # Save validation set predict images and call classifier
         print('saving val set images')
-        val_dataset = create_dataset(opt, val_eval=True, val_eval_number=opt.val_eval_number)  # create a dataset given opt.dataset_mode and other options
+        val_dataset = create_dataset(opt, val_eval=True) # val_eval_number=opt.val_eval_number)  # create a dataset given opt.dataset_mode and other options
         all_save_paths = []
         all_labels = []
-        for i, val_data in enumerate(dataset):  # inner loop within one epoch
-            print('i', i)
-            print('len val data', len(val_data))
-            model.set_input(val_data)  # unpack data from data loader
-            model.test()           # run inference
-            save_paths, labels = save_current_images(model, 'val')
-            print('len save paths', len(save_paths))
-            all_save_paths.extend(save_paths)
-            all_labels.extend(labels)
+        batches_to_evaluate = 2
+        for i, val_data in enumerate(val_dataset):  # inner loop within one epoch
+            if i <= batches_to_evaluate:
+                print('i', i)
+                print('len val data', len(val_data))
+                model.set_input(val_data)  # unpack data from data loader
+                model.test()           # run inference
+                save_paths, labels = save_current_images(model, 'val')
+                print('len save paths', len(save_paths))
+                all_save_paths.extend(save_paths)
+                all_labels.extend(labels)
         print('val images evaluated:', len(all_save_paths))
+        print('all save paths', all_save_paths)
         image_dir = os.path.join(opt.intermediate_results_dir, opt.name, str(epoch), 'train')
         print('running val set classifier test')
         classifier_test.main(model='resnet18', data_dir=image_dir, labels_file=opt.labels_file, pix2pix_interim=True,

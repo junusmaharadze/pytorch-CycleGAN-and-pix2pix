@@ -11,7 +11,7 @@ class AlignedDataset(BaseDataset):
     During test time, you need to prepare a directory '/path/to/data/test'.
     """
 
-    def __init__(self, opt, val_eval=False, val_eval_number=10):
+    def __init__(self, opt, val_eval=False):
         """Initialize this dataset class.
 
         Parameters:
@@ -24,7 +24,7 @@ class AlignedDataset(BaseDataset):
         else:
             self.dir_AB = os.path.join(opt.dataroot, 'val')  # get the image directory
 
-        self.AB_paths = sorted(make_dataset(self.dir_AB, opt.batch_size, opt.max_dataset_size, val_eval=val_eval, val_eval_number=val_eval_number))  # get image paths
+        self.AB_paths = sorted(make_dataset(self.dir_AB, opt.batch_size, opt.max_dataset_size, val_eval=val_eval))  # get image paths
         self.true_labels = {}
 
         # Save true labels for each image pair
