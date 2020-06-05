@@ -37,7 +37,8 @@ def save_current_images(model, dataset_type):
     labels = [model.get_image_labels()[ii] for ii in selected_imgs]
     image_dir = os.path.join(opt.intermediate_results_dir, opt.name, str(epoch), dataset_type)
     Path(image_dir).mkdir(parents=True, exist_ok=True)
-    save_interim_images(image_dir, selec_visuals, img_path, labels, aspect_ratio=1.0, width=256)
+    save_paths = save_interim_images(image_dir, selec_visuals, img_path, labels, aspect_ratio=1.0, width=256)
+    return save_paths, labels
 
 
 if __name__ == '__main__':
@@ -69,8 +70,13 @@ if __name__ == '__main__':
             model.optimize_parameters()   # calculate loss functions, get gradients, update network weights
 
             # Save training images
-            save_current_images(model, 'train')
-            # classifier_test.main()
+            save_paths, labels = save_current_images(model, 'train')
+            print(save_paths, labels)
+            image_dir = os.path.join(opt.intermediate_results_dir, opt.name, str(epoch), 'train')
+            classifier_test.main(model='resnet18', data_dir=image_dir, labels_file=opt.labels_file, pix2pix_interim=True,
+                                 current_img_paths=save_paths, current_labels=labels, data_split_type='train',
+                                 batch_size=opt.batch_size, num_workers=8, checkpoint_name='resnet18_checkpoint')
+
             # @Todo: Call classifier predict function with saved 'fake_B' images
 
             # Save validation set predict images
@@ -78,7 +84,12 @@ if __name__ == '__main__':
             for i, val_data in enumerate(dataset):  # inner loop within one epoch
                 model.set_input(val_data)  # unpack data from data loader
                 model.test()           # run inference
-                save_current_images(model, 'val')
+                save_paths, labels = save_current_images(model, 'val')
+                image_dir = os.path.join(opt.intermediate_results_dir, opt.name, str(epoch), 'train')
+                classifier_test.main(model='resnet18', data_dir=image_dir, labels_file=opt.labels_file, pix2pix_interim=True,
+                                     current_img_paths=save_paths, current_labels=labels, data_split_type='val',
+                                     batch_size=opt.batch_size, num_workers=8, checkpoint_name='resnet18_checkpoint')
+
                 # @Todo: Call classifier predict function with saved 'face_B' images
 
             if total_iters % opt.display_freq == 0:   # display images on visdom and save images to a HTML file

@@ -16,4 +16,5 @@ python train.py \
 --crop_size 128 \
 --num_threads 12 \
 --labels_file ./datasets/xBD_datasets/xBD_polygons_AB_csv/satellite_AB_labels.txt \
---intermediate_results_dir ./interim_results/
+--intermediate_results_dir ./interim_results/ \
+--save_epoch_freq 1

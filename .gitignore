@@ -55,3 +55,4 @@ old
 images_of_every_type.zip
 train.csv
 satellite_AB_labels.txt
+classifiers/checkpoints/

@@ -5,11 +5,11 @@ import time
 from torch.utils.data import DataLoader
 from tqdm import tqdm
 
-from xBD_data_loader import XbdDataset
-from utils import parse_arguments, initialize_model_and_params
+from classifiers.xBD_data_loader import XbdDataset
+from classifiers.utils import parse_arguments, initialize_model_and_params
 
 
-def test_model(model, data_loader, loss_function, device):
+def test_model(model, data_loader, loss_function, device, data_split_type='test'):
     """Test best validation model on unseen images
     Args:
         model (torchvision.model): The model with the trained weights
@@ -46,25 +46,35 @@ def test_model(model, data_loader, loss_function, device):
     total_acc = current_acc.double() / len(data_loader.dataset)
 
     time_elapsed = time.time() - since
-    print('Test complete in {:.0f}m {:.0f}s'.format(time_elapsed // 60, time_elapsed % 60))
+    print('Resnet18 Test complete in {:.0f}m {:.0f}s'.format(time_elapsed // 60, time_elapsed % 60))
 
-    print('Test Loss: {:.4f}; Accuracy: {:.4f}'.format(total_loss, total_acc))
+    print('{:s} Set Resnet18 Test Loss: {:.4f}; Accuracy: {:.4f}'.format(data_split_type, total_loss, total_acc))
     return total_acc, total_loss
 
 
-if __name__ == '__main__':
-    args = parse_arguments()
-    model, device, loss_function, _ = initialize_model_and_params(args.model)
+def main(**kwargs):
+    model, device, loss_function, _ = initialize_model_and_params(kwargs['model'])
 
-    checkpoint_path = os.path.join('./classifiers/checkpoints', args.checkpoint_name + '.pth')
+    checkpoint_path = os.path.join('./classifiers/checkpoints', kwargs['checkpoint_name'] + '.pth')
     print('Loading model {} for inference'.format(checkpoint_path))
 
     model.load_state_dict(torch.load(checkpoint_path))  # Loading model for inference
     model.to(device)  # Transfer the model to the GPU/CPU
 
     # Load the test data
-    test_dataset = XbdDataset(args.data_dir, args.labels_file, 'test')
-    test_loader = DataLoader(test_dataset, batch_size=args.batch_size, num_workers=args.num_workers, shuffle=False)
+    if 'pix2pix_interim' in kwargs:
+        if kwargs['pix2pix_interim'] is True:
+            test_dataset = XbdDataset(kwargs['data_dir'], kwargs['labels_file'], 'test', pix2pix_interim=True,
+                                      current_img_paths=kwargs['current_img_paths'], current_labels=kwargs['current_labels'])
+    else:
+        test_dataset = XbdDataset(kwargs['data_dir'], kwargs['labels_file'], 'test')
+    test_loader = DataLoader(test_dataset, batch_size=kwargs['batch_size'], num_workers=kwargs['num_workers'], shuffle=False)
 
     # Test model on unseen images
-    test_accuracy, test_loss = test_model(model, test_loader, loss_function, device)
+    test_accuracy, test_loss = test_model(model, test_loader, loss_function, device, kwargs['data_split_type'])
+
+
+if __name__ == '__main__':
+    args = parse_arguments()
+
+    main(args)

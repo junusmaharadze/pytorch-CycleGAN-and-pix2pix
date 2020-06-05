@@ -60,6 +60,7 @@ def save_interim_images(image_dir, visuals, image_path, labels=[], aspect_ratio=
     """
     short_path = ntpath.basename(image_path[0])
     name = os.path.splitext(short_path)[0]
+    save_paths = []
 
     for label, im_data in visuals.items():
         for ii, image in enumerate(im_data):
@@ -69,6 +70,8 @@ def save_interim_images(image_dir, visuals, image_path, labels=[], aspect_ratio=
                 image_name = '%s_%s.png' % (name, label)
                 save_path = os.path.join(image_dir, image_name)
                 torchvision.utils.save_image(image, save_path, normalize=True)
+                save_paths.append(save_path)
+    return save_paths
 
 
 class Visualizer():
