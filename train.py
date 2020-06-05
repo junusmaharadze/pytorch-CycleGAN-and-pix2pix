@@ -46,7 +46,7 @@ def save_current_images(model, dataset_type):
 if __name__ == '__main__':
     opt = TrainOptions().parse()   # get training options
     dataset = create_dataset(opt)  # create a dataset given opt.dataset_mode and other options
-    val_dataset = create_dataset(opt, val_eval=True) # val_eval_number=opt.val_eval_number)  # create a dataset given opt.dataset_mode and other options
+    val_dataset = create_dataset(opt, val_eval=True)  # val_eval_number=opt.val_eval_number)  # create a dataset given opt.dataset_mode and other options
     print('\n DATASET', dataset)
     dataset_size = len(dataset)    # get the number of images in the dataset.
     print('The number of training images = %d' % dataset_size)
@@ -113,13 +113,8 @@ if __name__ == '__main__':
         all_labels = []
         for i, val_data in enumerate(val_dataset):  # inner loop within one epoch
             if i <= opt.batches_to_evaluate:
-                print('i', i)
-                print('setting input')
-                print('len val data', len(val_data))
                 model.set_input(val_data)  # unpack data from data loader
-                print('test')
                 model.test()           # run inference
-                print('save current images')
                 save_paths, labels = save_current_images(model, 'val')
                 all_save_paths.extend(save_paths)
                 all_labels.extend(labels)
