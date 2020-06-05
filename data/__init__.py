@@ -54,7 +54,6 @@ def create_dataset(opt, val_eval=False, val_eval_number=100):
         >>> from data import create_dataset
         >>> dataset = create_dataset(opt)
     """
-    print('create_dataset val eval', val_eval)
     data_loader = CustomDatasetDataLoader(opt, val_eval=val_eval, val_eval_number=val_eval_number)
     dataset = data_loader.load_data()
     return dataset
@@ -69,12 +68,12 @@ class CustomDatasetDataLoader():
         Step 1: create a dataset instance given the name [dataset_mode]
         Step 2: create a multi-threaded data loader.
         """
-        print('custom dataset data loader val eval', val_eval)
         self.opt = opt
         self.val_eval = val_eval
         dataset_class = find_dataset_using_name(opt.dataset_mode)
         self.dataset = dataset_class(opt, val_eval=val_eval, val_eval_number=val_eval_number)
         print("dataset [%s] was created" % type(self.dataset).__name__)
+        print('len dataset', len(self.dataset))
         self.dataloader = torch.utils.data.DataLoader(
             self.dataset,
             batch_size=opt.batch_size,

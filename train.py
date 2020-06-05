@@ -109,9 +109,12 @@ if __name__ == '__main__':
         all_save_paths = []
         all_labels = []
         for i, val_data in enumerate(dataset):  # inner loop within one epoch
+            print('i', i)
+            print('len val data', len(val_data))
             model.set_input(val_data)  # unpack data from data loader
             model.test()           # run inference
             save_paths, labels = save_current_images(model, 'val')
+            print('len save paths', len(save_paths))
             all_save_paths.extend(save_paths)
             all_labels.extend(labels)
         print('val images evaluated:', len(all_save_paths))
