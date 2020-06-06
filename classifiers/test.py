@@ -53,38 +53,6 @@ def test_model(model, data_loader, loss_function, device, data_split_type='test'
     return total_acc, total_loss
 
 
-# def main_gan(**kwargs):
-#     model, device, loss_function, _ = utils.initialize_model_and_params(kwargs['model'])
-
-#     checkpoint_path = os.path.join('./classifiers/checkpoints', kwargs['checkpoint_name'] + '.pth')
-#     print('Loading model {} for inference'.format(checkpoint_path))
-
-#     model.load_state_dict(torch.load(checkpoint_path))  # Loading model for inference
-#     model.to(device)  # Transfer the model to the GPU/CPU
-
-#     # Load the test data
-#     if 'pix2pix_interim' in kwargs:
-#         if kwargs['pix2pix_interim'] is True:
-#             test_dataset = xBD_data_loader.XbdDataset(kwargs['data_dir'], kwargs['labels_file'], 'test', pix2pix_interim=True,
-#                                       current_img_paths=kwargs['current_img_paths'], current_labels=kwargs['current_labels'])
-#     else:
-#         test_dataset = xBD_data_loader.XbdDataset(kwargs['data_dir'], kwargs['labels_file'], 'test')
-#     test_loader = DataLoader(test_dataset, batch_size=kwargs['batch_size'], num_workers=kwargs['num_workers'], shuffle=False)
-
-#     # Test model on unseen images
-#     test_accuracy, test_loss = test_model(model, test_loader, loss_function, device, kwargs['data_split_type'])
-#     if 'pix2pix_interim' in kwargs:
-#         gan_eval_results_dir = './gan_eval'
-#         if not os.path.isdir(gan_eval_results_dir):
-#             os.mkdir(gan_eval_results_dir)
-#         labels_file = Path(os.path.join(gan_eval_results_dir, 'gan_eval.csv'))
-#         if not labels_file.is_file():
-#             with open(labels_file, 'w') as file:
-#                 pass
-#         with open(labels_file, 'a') as file:
-#             file.write(str(kwargs['data_split_type']) + ',' + str(kwargs['epoch']) + ',' + str(float(test_accuracy)) + ',' + str(float(test_loss)) + '\n')
-
-
 if __name__ == '__main__':
     args = utils.parse_arguments()
 
