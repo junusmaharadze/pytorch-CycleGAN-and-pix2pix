@@ -90,4 +90,7 @@ To train the GAN, run:
 bash scripts/pix2pix_satellite.sh
 ```
 
+After each epoch, generated sample images from train and val will be saved under `interim_results/model_name`, and the
+classification results will be saved under `gan_eval/gan_eval.csv`.
+
 The concurrent classifier evaluation can be set off with the option `--classifier_evaluation False`.
