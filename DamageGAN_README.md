@@ -80,4 +80,14 @@ bash scripts/run_classifier.sh test
 This should run without any other calls or modifications, given that the data folder structure is the same as mentioned
 in the previous section. However, you can modify `scripts/run_classifier.sh` to change the parameters.
 
-@TODO: Write detailed steps on how to train the GAN etc.
+## Train GAN with concurrent classifier evaluation
+
+After each epoch of GAN training, the trained classifier is called to predict the classes of the generated images.
+The trained classifier weights are expected to be in `classifiers/checkpoints/resnet18_checkpoint.pth`.
+
+To train the GAN, run:
+```
+bash scripts/pix2pix_satellite.sh
+```
+
+The concurrent classifier evaluation can be set off with the option `--classifier_evaluation False`.

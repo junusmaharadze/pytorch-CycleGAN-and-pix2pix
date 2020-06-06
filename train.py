@@ -99,34 +99,35 @@ if __name__ == '__main__':
         model.update_learning_rate()                     # update learning rates at the end of every epoch.
 
         # Save training images and call classifier
-        print('saving training images')
-        save_paths, labels = save_current_images(model, 'train')
-        image_dir = os.path.join(opt.intermediate_results_dir, opt.name, str(epoch), 'train')
-        print('running train set classifier test')
-        classifier_test.main_gan(model='resnet18', data_dir=image_dir, labels_file=opt.labels_file, pix2pix_interim=True,
-                             current_img_paths=save_paths, current_labels=labels, data_split_type='train',
-                             batch_size=opt.batch_size, num_workers=8, checkpoint_name='resnet18_checkpoint',
-                             epoch=epoch)
+        if opt.classifier_evaluation is True:
+            print('saving training images')
+            save_paths, labels = save_current_images(model, 'train')
+            image_dir = os.path.join(opt.intermediate_results_dir, opt.name, str(epoch), 'train')
+            print('running train set classifier test')
+            classifier_test.main_gan(model='resnet18', data_dir=image_dir, labels_file=opt.labels_file, pix2pix_interim=True,
+                                     current_img_paths=save_paths, current_labels=labels, data_split_type='train',
+                                     batch_size=opt.batch_size, num_workers=8, checkpoint_name='resnet18_checkpoint',
+                                     epoch=epoch)
 
-        # Save validation set predict images and call classifier
-        print('saving val set images')
-        all_save_paths = []
-        all_labels = []
-        for i, val_data in enumerate(val_dataset):  # inner loop within one epoch
-            if i < opt.batches_to_evaluate:
-                model.set_input(val_data)  # unpack data from data loader
-                model.test()           # run inference
-                save_paths, labels = save_current_images(model, 'val')
-                all_save_paths.extend(save_paths)
-                all_labels.extend(labels)
-            else:
-                break
-        print('val images evaluated:', len(all_save_paths))
-        image_dir = os.path.join(opt.intermediate_results_dir, opt.name, str(epoch), 'train')
-        print('running val set classifier test')
-        classifier_test.main_gan(model='resnet18', data_dir=image_dir, labels_file=opt.labels_file, pix2pix_interim=True,
-                             current_img_paths=all_save_paths, current_labels=all_labels, data_split_type='val',
-                             batch_size=opt.batch_size, num_workers=8, checkpoint_name='resnet18_checkpoint',
-                             epoch=epoch)
+            # Save validation set predict images and call classifier
+            print('saving val set images')
+            all_save_paths = []
+            all_labels = []
+            for i, val_data in enumerate(val_dataset):  # inner loop within one epoch
+                if i < opt.batches_to_evaluate:
+                    model.set_input(val_data)  # unpack data from data loader
+                    model.test()           # run inference
+                    save_paths, labels = save_current_images(model, 'val')
+                    all_save_paths.extend(save_paths)
+                    all_labels.extend(labels)
+                else:
+                    break
+            print('val images evaluated:', len(all_save_paths))
+            image_dir = os.path.join(opt.intermediate_results_dir, opt.name, str(epoch), 'train')
+            print('running val set classifier test')
+            classifier_test.main_gan(model='resnet18', data_dir=image_dir, labels_file=opt.labels_file, pix2pix_interim=True,
+                                     current_img_paths=all_save_paths, current_labels=all_labels, data_split_type='val',
+                                     batch_size=opt.batch_size, num_workers=8, checkpoint_name='resnet18_checkpoint',
+                                     epoch=epoch)
 
         print('End of epoch %d / %d \t Time Taken: %d sec' % (epoch, opt.n_epochs + opt.n_epochs_decay, time.time() - epoch_start_time))

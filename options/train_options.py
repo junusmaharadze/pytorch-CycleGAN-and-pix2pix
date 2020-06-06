@@ -40,6 +40,7 @@ class TrainOptions(BaseOptions):
         parser.add_argument('--aspect_ratio', type=float, default=1.0, help='aspect ratio of result images')
         parser.add_argument('--random_seed', type=float, default=344344598794, help='random seed')
         parser.add_argument('--batches_to_evaluate', type=int, default=2, help='number of validation batches to save and pass to classifier test')
+        parser.add_argument('--classifier_evaluation', type=int, default=True, help='whether to have classifier evaluation')
 
         self.isTrain = True
         return parser

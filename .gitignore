@@ -58,3 +58,4 @@ satellite_AB_labels.txt
 classifiers/checkpoints/
 gan_eval.csv
 gan_eval/
+DamageGAN_README.html
