@@ -42,7 +42,8 @@ class BaseModel(ABC):
         self.optimizers = []
         self.image_paths = []
         self.metric = 0  # used for learning rate policy 'plateau'
-        self.seed = opt.random_seed
+        if opt.random_seed is not None:
+            self.seed = opt.random_seed
 
     @staticmethod
     def modify_commandline_options(parser, is_train):

@@ -28,6 +28,8 @@ from util.visualizer import save_interim_images
 import os
 from pathlib import Path
 import classifiers.test_gan_eval as classifier_test
+import torch
+import numpy as np
 
 
 def save_current_images(model, dataset_type):
@@ -42,6 +44,10 @@ def save_current_images(model, dataset_type):
 
 if __name__ == '__main__':
     opt = TrainOptions().parse()   # get training options
+    if opt.random_seed is not None:
+        torch.manual_seed(opt.random_seed)
+        np.random.seed(opt.random_seed)
+
     dataset = create_dataset(opt)  # create a dataset given opt.dataset_mode and other options
     val_dataset = create_dataset(opt, val_eval=True)  # val_eval_number=opt.val_eval_number)  # create a dataset given opt.dataset_mode and other options
     print('\n DATASET', dataset)
