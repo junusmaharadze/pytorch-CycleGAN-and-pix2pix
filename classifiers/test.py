@@ -5,7 +5,7 @@ import time
 from torch.utils.data import DataLoader
 from tqdm import tqdm
 
-import xBD_data_loader
+from xBD_data_loader import XbdDataset
 import utils
 from pathlib import Path
 
@@ -47,9 +47,9 @@ def test_model(model, data_loader, loss_function, device, data_split_type='test'
     total_acc = current_acc.double() / len(data_loader.dataset)
 
     time_elapsed = time.time() - since
-    print('Resnet18 Test complete in {:.0f}m {:.0f}s'.format(time_elapsed // 60, time_elapsed % 60))
+    print('Test complete in {:.0f}m {:.0f}s'.format(time_elapsed // 60, time_elapsed % 60))
 
-    print('{:s} Set Resnet18 Test Loss: {:.4f}; Accuracy: {:.4f}'.format(data_split_type, total_loss, total_acc))
+    print('{:s} Set Loss: {:.4f}; Accuracy: {:.4f}'.format(data_split_type, total_loss, total_acc))
     return total_acc, total_loss
 
 
@@ -65,7 +65,7 @@ if __name__ == '__main__':
     model.to(device)  # Transfer the model to the GPU/CPU
 
     # Load the test data
-    test_dataset = xBD_data_loader.XbdDataset(args.data_dir, args.labels_file, 'test')
+    test_dataset = XbdDataset(args.data_dir, args.labels_file, 'test')
     test_loader = DataLoader(test_dataset, batch_size=args.batch_size, num_workers=args.num_workers, shuffle=False)
 
     # Test model on unseen images

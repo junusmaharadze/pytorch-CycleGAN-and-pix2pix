@@ -67,6 +67,10 @@ class CustomDatasetDataLoader():
 
         Step 1: create a dataset instance given the name [dataset_mode]
         Step 2: create a multi-threaded data loader.
+
+        Parameters:
+            opt (Option class) -- stores all the experiment flags; needs to be a subclass of BaseOptions
+            val_eval -- boolean to indicate the validation set evaluation at the end of each epoch
         """
         self.opt = opt
         self.val_eval = val_eval

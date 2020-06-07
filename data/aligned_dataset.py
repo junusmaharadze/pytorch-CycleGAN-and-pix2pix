@@ -16,15 +16,13 @@ class AlignedDataset(BaseDataset):
 
         Parameters:
             opt (Option class) -- stores all the experiment flags; needs to be a subclass of BaseOptions
+            val_eval -- boolean to indicate the validation set evaluation at the end of each epoch
         """
 
         BaseDataset.__init__(self, opt)
-        if val_eval is False:
-            self.dir_AB = os.path.join(opt.dataroot, opt.phase)  # get the image directory
-        else:
-            self.dir_AB = os.path.join(opt.dataroot, 'val')  # get the image directory
+        self.dir_AB = os.path.join(opt.dataroot, 'val' if val_eval is True else opt.phase)
 
-        self.AB_paths = sorted(make_dataset(self.dir_AB, opt.batch_size, opt.max_dataset_size, val_eval=val_eval))  # get image paths
+        self.AB_paths = sorted(make_dataset(self.dir_AB, opt.max_dataset_size))  # get image paths
         self.true_labels = {}
 
         # Save true labels for each image pair

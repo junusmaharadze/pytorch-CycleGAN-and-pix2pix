@@ -34,9 +34,6 @@ def save_current_images(model, dataset_type):
     selec_visuals = model.get_current_visuals()
     img_path = model.get_image_paths()     # get image paths
     labels = model.get_image_labels()
-    # selec_visuals, selected_imgs = model.get_current_visuals_sample()
-    # img_path = [model.get_image_paths()[ii] for ii in selected_imgs]     # get image paths
-    # labels = [model.get_image_labels()[ii] for ii in selected_imgs]
     image_dir = os.path.join(opt.intermediate_results_dir, opt.name, str(epoch), dataset_type)
     Path(image_dir).mkdir(parents=True, exist_ok=True)
     save_paths = save_interim_images(image_dir, selec_visuals, img_path, labels, aspect_ratio=1.0, width=256)
