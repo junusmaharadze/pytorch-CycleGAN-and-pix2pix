@@ -1,12 +1,12 @@
 # DamageGAN - Complete documentation
 
-This is the complete documentation to preprocess the xBD datasets (train/va/test) so that they have the expected format
+This is the complete documentation to preprocess the xBD datasets (train/val/test) so that they have the expected format
 required for training using the pix2pix model.
 
 ## Preprocess satellite images for the pix2pix GAN
 
 The pix2pix model requires that the images are in a specific format in folders _A_, _B_ and _AB_
-This process is different from the preparation for the classifier, since the Pix2Pixs needs fodler A, B, AB, with the
+This process is different from the preparation for the classifier, since the Pix2Pixs needs folder A, B, AB, with the
 same filenames in each folder. Follow the steps below to download and preprocess the xBD dataset.
 
 Steps:
