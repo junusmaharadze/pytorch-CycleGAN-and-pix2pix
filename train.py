@@ -110,7 +110,7 @@ if __name__ == '__main__':
             classifier_test.main_gan(model='resnet18', data_dir=image_dir, labels_file=opt.labels_file, pix2pix_interim=True,
                                      current_img_paths=save_paths, current_labels=labels, data_split_type='train',
                                      batch_size=opt.batch_size, num_workers=8, checkpoint_name='resnet18_checkpoint',
-                                     epoch=epoch)
+                                     epoch=epoch, model_name=opt.name)
 
             # Save validation set predict images and call classifier
             print('saving val set images')
@@ -131,6 +131,6 @@ if __name__ == '__main__':
             classifier_test.main_gan(model='resnet18', data_dir=image_dir, labels_file=opt.labels_file, pix2pix_interim=True,
                                      current_img_paths=all_save_paths, current_labels=all_labels, data_split_type='val',
                                      batch_size=opt.batch_size, num_workers=8, checkpoint_name='resnet18_checkpoint',
-                                     epoch=epoch)
+                                     epoch=epoch, model_name=opt.name)
 
         print('End of epoch %d / %d \t Time Taken: %d sec' % (epoch, opt.n_epochs + opt.n_epochs_decay, time.time() - epoch_start_time))
