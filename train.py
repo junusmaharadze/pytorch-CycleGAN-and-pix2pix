@@ -24,9 +24,32 @@ from data import create_dataset
 from models import create_model
 from util.visualizer import Visualizer
 
+from util.visualizer import save_interim_images
+import os
+from pathlib import Path
+import classifiers.test_gan_eval as classifier_test
+import torch
+import numpy as np
+
+
+def save_current_images(model, dataset_type):
+    selec_visuals = model.get_current_visuals()
+    img_path = model.get_image_paths()     # get image paths
+    labels = model.get_image_labels()
+    image_dir = os.path.join(opt.intermediate_results_dir, opt.name, str(epoch), dataset_type)
+    Path(image_dir).mkdir(parents=True, exist_ok=True)
+    save_paths = save_interim_images(image_dir, selec_visuals, img_path, labels, aspect_ratio=1.0, width=256)
+    return save_paths, labels
+
+
 if __name__ == '__main__':
     opt = TrainOptions().parse()   # get training options
+    if opt.random_seed is not None:
+        torch.manual_seed(opt.random_seed)
+        np.random.seed(opt.random_seed)
+
     dataset = create_dataset(opt)  # create a dataset given opt.dataset_mode and other options
+    val_dataset = create_dataset(opt, val_eval=True)  # val_eval_number=opt.val_eval_number)  # create a dataset given opt.dataset_mode and other options
     print('\n DATASET', dataset)
     dataset_size = len(dataset)    # get the number of images in the dataset.
     print('The number of training images = %d' % dataset_size)
@@ -70,10 +93,44 @@ if __name__ == '__main__':
                 model.save_networks(save_suffix)
 
             iter_data_time = time.time()
+
         if epoch % opt.save_epoch_freq == 0:              # cache our model every <save_epoch_freq> epochs
             print('saving the model at the end of epoch %d, iters %d' % (epoch, total_iters))
             model.save_networks('latest')
             model.save_networks(epoch)
 
-        print('End of epoch %d / %d \t Time Taken: %d sec' % (epoch, opt.n_epochs + opt.n_epochs_decay, time.time() - epoch_start_time))
         model.update_learning_rate()                     # update learning rates at the end of every epoch.
+
+        # Save training images and call classifier
+        if opt.classifier_evaluation is True:
+            print('saving training images')
+            save_paths, labels = save_current_images(model, 'train')
+            image_dir = os.path.join(opt.intermediate_results_dir, opt.name, str(epoch), 'train')
+            print('running train set classifier test')
+            classifier_test.main_gan(model='resnet18', data_dir=image_dir, labels_file=opt.labels_file, pix2pix_interim=True,
+                                     current_img_paths=save_paths, current_labels=labels, data_split_type='train',
+                                     batch_size=opt.batch_size, num_workers=8, checkpoint_name='resnet18_checkpoint',
+                                     epoch=epoch, model_name=opt.name)
+
+            # Save validation set predict images and call classifier
+            print('saving val set images')
+            all_save_paths = []
+            all_labels = []
+            for i, val_data in enumerate(val_dataset):  # inner loop within one epoch
+                if i < opt.batches_to_evaluate:
+                    model.set_input(val_data)  # unpack data from data loader
+                    model.test()           # run inference
+                    save_paths, labels = save_current_images(model, 'val')
+                    all_save_paths.extend(save_paths)
+                    all_labels.extend(labels)
+                else:
+                    break
+            print('val images evaluated:', len(all_save_paths))
+            image_dir = os.path.join(opt.intermediate_results_dir, opt.name, str(epoch), 'train')
+            print('running val set classifier test')
+            classifier_test.main_gan(model='resnet18', data_dir=image_dir, labels_file=opt.labels_file, pix2pix_interim=True,
+                                     current_img_paths=all_save_paths, current_labels=all_labels, data_split_type='val',
+                                     batch_size=opt.batch_size, num_workers=8, checkpoint_name='resnet18_checkpoint',
+                                     epoch=epoch, model_name=opt.name)
+
+        print('End of epoch %d / %d \t Time Taken: %d sec' % (epoch, opt.n_epochs + opt.n_epochs_decay, time.time() - epoch_start_time))

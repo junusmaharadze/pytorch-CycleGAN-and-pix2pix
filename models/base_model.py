@@ -3,7 +3,7 @@ import torch
 from collections import OrderedDict
 from abc import ABC, abstractmethod
 from . import networks
-
+import random
 
 class BaseModel(ABC):
     """This class is an abstract base class (ABC) for models.
@@ -42,6 +42,8 @@ class BaseModel(ABC):
         self.optimizers = []
         self.image_paths = []
         self.metric = 0  # used for learning rate policy 'plateau'
+        if opt.random_seed is not None:
+            self.seed = opt.random_seed
 
     @staticmethod
     def modify_commandline_options(parser, is_train):

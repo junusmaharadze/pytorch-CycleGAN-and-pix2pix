@@ -6,10 +6,11 @@ from torch.utils.data import DataLoader
 from tqdm import tqdm
 
 from xBD_data_loader import XbdDataset
-from utils import parse_arguments, initialize_model_and_params
+import utils
+from pathlib import Path
 
 
-def test_model(model, data_loader, loss_function, device):
+def test_model(model, data_loader, loss_function, device, data_split_type='test'):
     """Test best validation model on unseen images
     Args:
         model (torchvision.model): The model with the trained weights
@@ -48,13 +49,14 @@ def test_model(model, data_loader, loss_function, device):
     time_elapsed = time.time() - since
     print('Test complete in {:.0f}m {:.0f}s'.format(time_elapsed // 60, time_elapsed % 60))
 
-    print('Test Loss: {:.4f}; Accuracy: {:.4f}'.format(total_loss, total_acc))
+    print('{:s} Set Loss: {:.4f}; Accuracy: {:.4f}'.format(data_split_type, total_loss, total_acc))
     return total_acc, total_loss
 
 
 if __name__ == '__main__':
-    args = parse_arguments()
-    model, device, loss_function, _ = initialize_model_and_params(args.model)
+    args = utils.parse_arguments()
+
+    model, device, loss_function, _ = utils.initialize_model_and_params(args.model)
 
     checkpoint_path = os.path.join('./classifiers/checkpoints', args.checkpoint_name + '.pth')
     print('Loading model {} for inference'.format(checkpoint_path))

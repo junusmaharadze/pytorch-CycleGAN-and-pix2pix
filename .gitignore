@@ -51,6 +51,11 @@ new_train_every_third.csv
 sftp-config.json
 stats_results_detach_beforeNETD/
 generated_imgs_every_third
-old_results
-old_satellite_AB_generated
-old_test_results
+old
+images_of_every_type.zip
+train.csv
+satellite_AB_labels.txt
+classifiers/checkpoints/
+gan_eval.csv
+gan_eval/
+DamageGAN_README.html

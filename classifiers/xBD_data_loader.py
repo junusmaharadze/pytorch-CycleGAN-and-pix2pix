@@ -35,20 +35,30 @@ data_transforms = {
 
 
 class XbdDataset(Dataset):
-    def __init__(self, data_dir, labels_file, data_split):
+    def __init__(self, data_dir, labels_file, data_split, pix2pix_interim=False,
+                 current_img_paths=None, current_labels=None):
         self.data_dir = data_dir
         self.labels_file = labels_file
         self.data_split = data_split
         self.paths_labels_dict = defaultdict(dict)
-        self._construct_labels_dict()
+        self.pix2pix_interim = pix2pix_interim
+        if pix2pix_interim is False:
+            self._construct_labels_dict()
+        else:
+            self.filenames = current_img_paths
+            self.labels = [int(x) for x in current_labels]
 
     def __len__(self):
         return len(self.filenames)
 
     def __getitem__(self, index):
         # Generates one sample of the data
-        images_dir = os.path.join(self.data_dir, 'B', self.data_split)
-        image_path = os.path.join(images_dir, self.filenames[index])
+        if self.pix2pix_interim is False:
+            images_dir = os.path.join(self.data_dir, 'B', self.data_split)
+            image_path = os.path.join(images_dir, self.filenames[index])
+        else:
+            images_dir = self.data_dir
+            image_path = self.filenames[index]
 
         image = Image.open(image_path)
         transformed_image = data_transforms[self.data_split](image)
