@@ -83,8 +83,8 @@ def main_gan(**kwargs):
                                                    kwargs['data_split_type'])
     if 'pix2pix_interim' in kwargs:
         gan_eval_results_dir = os.path.join('./gan_eval', kwargs['model_name'])
-        if not os.path.isdir(gan_eval_results_dir):
-            os.mkdir(gan_eval_results_dir)
+        Path(gan_eval_results_dir).mkdir(parents=True, exist_ok=True)
+
         labels_file = Path(os.path.join(gan_eval_results_dir, 'gan_eval.csv'))
         if not labels_file.is_file():
             with open(labels_file, 'w') as file:
