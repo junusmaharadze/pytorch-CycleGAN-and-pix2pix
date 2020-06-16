@@ -119,6 +119,7 @@ if __name__ == '__main__':
             for i, val_data in enumerate(val_dataset):  # inner loop within one epoch
                 if i < opt.batches_to_evaluate:
                     model.set_input(val_data)  # unpack data from data loader
+                    model.eval()
                     model.test()           # run inference
                     save_paths, labels = save_current_images(model, 'val')
                     all_save_paths.extend(save_paths)
