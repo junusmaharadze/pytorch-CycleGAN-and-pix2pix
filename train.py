@@ -60,6 +60,7 @@ if __name__ == '__main__':
     total_iters = 0                # the total number of training iterations
 
     for epoch in range(opt.epoch_count, opt.n_epochs + opt.n_epochs_decay + 1):    # outer loop for different epochs; we save the model by <epoch_count>, <epoch_count>+<save_latest_freq>
+        model.train()
         epoch_start_time = time.time()  # timer for entire epoch
         iter_data_time = time.time()    # timer for data loading per iteration
         epoch_iter = 0                  # the number of training iterations in current epoch, reset to 0 every epoch
@@ -104,7 +105,19 @@ if __name__ == '__main__':
         # Save training images and call classifier
         if opt.classifier_evaluation is True:
             print('saving training images')
-            save_paths, labels = save_current_images(model, 'train')
+            all_save_paths = []
+            all_labels = []
+            for i, train_data in enumerate(dataset):  # inner loop within one epoch
+                if i < opt.batches_to_evaluate:
+                    model.set_input(train_data)  # unpack data from data loader
+                    model.eval()
+                    model.test()           # run inference
+                    save_paths, labels = save_current_images(model, 'train')
+                    all_save_paths.extend(save_paths)
+                    all_labels.extend(labels)
+                else:
+                    break
+            # save_paths, labels = save_current_images(model, 'train')
             image_dir = os.path.join(opt.intermediate_results_dir, opt.name, str(epoch), 'train')
             print('running train set classifier test')
             classifier_test.main_gan(model='resnet18', data_dir=image_dir, labels_file=opt.labels_file, pix2pix_interim=True,
@@ -119,6 +132,7 @@ if __name__ == '__main__':
             for i, val_data in enumerate(val_dataset):  # inner loop within one epoch
                 if i < opt.batches_to_evaluate:
                     model.set_input(val_data)  # unpack data from data loader
+                    model.eval()
                     model.test()           # run inference
                     save_paths, labels = save_current_images(model, 'val')
                     all_save_paths.extend(save_paths)
