@@ -95,3 +95,8 @@ classification results will be saved under `gan_eval/gan_eval.csv`.
 
 The concurrent classifier evaluation can be set off with the option `--classifier_evaluation False` in
 `scripts/pix2pix_satellite.sh`.
+
+To view plots of the accuracy, loss and F1 score written in the `gan_eval.csv` for the training and validation sets, run:
+```
+python plots/plot_gan_eval_metrics.py --csv_file ~/Downloads/gan_eval.csv
+```
